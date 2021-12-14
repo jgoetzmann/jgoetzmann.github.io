@@ -1,2 +1,2 @@
 alert("EEEadldjajksd")
-alert("ahidaidsadjhajdhaodwudhuioahhiohsduioyawidgabdjkashdjkahjkd")
+alert("goomet")
