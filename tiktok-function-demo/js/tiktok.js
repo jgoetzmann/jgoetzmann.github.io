@@ -34,6 +34,7 @@ function rankingAlgorithm(numLikes, numComments, numShares, comment, ifFriend, i
     }
 }
 
+/*
 function rankingCall() {
     // favthing prompts
     let favThing = prompt("What is you favorite thing?");
@@ -63,5 +64,6 @@ function showUI() {
 
     document.getElementById("result-paragraph").innerHTML = "Tiktok Rank: " + rankResult;
 }
+*/
 
 showUI();
