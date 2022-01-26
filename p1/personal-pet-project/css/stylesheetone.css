@@ -1,9 +1,16 @@
 body {
     background-color: #ffffffff;
-    text-align: center;
 }
 
 h1 {
     color: #000000;
-    text-align: center;
+}
+
+img {
+    width: 400px;
+    height: auto;
+}
+
+.big {
+    padding: 20px 20px;
 }
