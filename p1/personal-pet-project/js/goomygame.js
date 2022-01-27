@@ -99,5 +99,7 @@ function updateValues() {
 }
 
 function updatePicture() {
-    goomyImage.src = goomy
+    goomyImage.src = "images/goomy-very-sad.jpg";
 }
+
+updatePicture();
