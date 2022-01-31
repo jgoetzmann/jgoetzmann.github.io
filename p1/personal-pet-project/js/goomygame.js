@@ -16,6 +16,7 @@ let gameLength = 0;
 let happiness = 50;
 let hunger = 10;
 let health = 50;
+let statTotal = 150;
 
 // Meter values
 let happinessMeter = document.getElementById("hapiness-meter");
@@ -35,6 +36,7 @@ let healthUpdateValue = .5;
 // Image values 
 let goomyImage = document.getElementById("goomy-image")
 const goomyLibrary = ["images/goomy-god.png", "images/goomy-flushed.png", "images/goomy-very-happy.jpg", "images/goomy-happy.jpg", "images/goomy-neutral.jpg", "images/goomy-annoyed.jpeg", "images/goomy-very-sad.jpg", "images/goomy-distress.jpg", "images/goomy-dead.jpg"];
+goomyImageLibrary = 4;
 
 /*
 let happinessMeter = document.getElementById("hapiness-meter");
@@ -115,5 +117,17 @@ function updateValues() {
 }
 
 function updatePicture() {
-    goomyImage.src = goomyLibrary[testGoomy]
+    statTotal = happiness + health + (hunger * 5);
+
+    if (statTotal >= 1) { goomyImageLibrary = 7 };
+    if (statTotal >= 50) { goomyImageLibrary = 6 };
+    if (statTotal >= 100) { goomyImageLibrary = 5 };
+    if (statTotal >= 133) { goomyImageLibrary = 4 };
+    if (statTotal >= 166) { goomyImageLibrary = 3 };
+    if (statTotal >= 200) { goomyImageLibrary = 2 };
+    if (statTotal >= 250) { goomyImageLibrary = 1 };
+    if (statTotal === 300) { goomyImageLibrary = 0 };
+    if (statTotal === 0) { goomyImageLibrary = 8 };
+
+    goomyImage.src = goomyLibrary[goomyImageLibrary];
 }
