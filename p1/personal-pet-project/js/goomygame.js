@@ -1,4 +1,4 @@
-console.log("Hello World")
+console.log("Hello World");
 
 const bp = [100, 200, 120, 800];
 const moves = ["Jay beam", "Rishay Punch", "Ethan Slam", "Soren Smack"];
@@ -6,9 +6,15 @@ const moves = ["Jay beam", "Rishay Punch", "Ethan Slam", "Soren Smack"];
 console.log(bp[0]);
 console.log(moves[0]);
 
+// Debug values
+let testGoomy = 0;
+
+// Second Check value
+let gameLength = 0;
+
 // Base values 
 let happiness = 50;
-let hunger = 5;
+let hunger = 10;
 let health = 50;
 
 // Meter values
@@ -22,12 +28,13 @@ let hungerParagraph = document.getElementById("hunger-paragraph");
 let healthParagraph = document.getElementById("health-paragraph");
 
 // Update values (difficulty)
-let happinessUpdateValue = 10
-let hungerUpdateValue = 1
-let healthUpdateValue = 5
+let happinessUpdateValue = 1;
+let hungerUpdateValue = .5;
+let healthUpdateValue = .5;
 
 // Image values 
 let goomyImage = document.getElementById("goomy-image")
+const goomyLibrary = ["images/goomy-god.png", "images/goomy-flushed.png", "images/goomy-very-happy.jpg", "images/goomy-happy.jpg", "images/goomy-neutral.jpg", "images/goomy-annoyed.jpeg", "images/goomy-very-sad.jpg", "images/goomy-distress.jpg", "images/goomy-dead.jpg"];
 
 /*
 let happinessMeter = document.getElementById("hapiness-meter");
@@ -45,14 +52,14 @@ function amuseGoomy() {
 // Feed oncluck
 function feedGoomy() {
     console.log("Feed Trigger");
-    if (hunger >= 9) { hunger = 10 } else { hunger += 1 };
+    if (hunger >= 18) { hunger = 20 } else { hunger += 2 };
     console.log("hunger: " + hunger);
 }
 
 // Heal onClick
 function healGoomy() {
     console.log("Heal Trigger");
-    if (health >= 90) { health = 100 } else { health += 10 };
+    if (health >= 95) { health = 100 } else { health += 5 };
     console.log("health: " + health);
 }
 
@@ -88,18 +95,25 @@ function refreshUI() {
 }
 
 // Calls for Update every second
-setInterval(updateValues, 1000);
+setInterval(updateValues, 100);
 
 // Updates values
 function updateValues() {
-    if (happiness > 0) { happiness -= happinessUpdateValue };
-    if (hunger > 0) { hunger -= hungerUpdateValue };
-    if (health > 0) { health -= healthUpdateValue };
+
+    if (Number.isInteger(gameLength / 10) === true) {
+        if (happiness > 0) { happiness -= happinessUpdateValue };
+        if (hunger > 0) { hunger -= hungerUpdateValue };
+        if (health > 0) { health -= healthUpdateValue };
+        console.log("update at " + gameLength);
+
+        updatePicture();
+    }
     refreshUI();
+
+    gameLength += 1;
+    console.log(gameLength);
 }
 
 function updatePicture() {
-    goomyImage.src = "images/goomy-very-sad.jpg";
+    goomyImage.src = goomyLibrary[testGoomy]
 }
-
-updatePicture();
