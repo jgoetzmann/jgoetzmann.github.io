@@ -99,9 +99,9 @@ setInterval(updateValues, 100);
 function updateValues() {
 
     if (Number.isInteger(gameLength / 10) === true) {
-        if (happiness > 0) { happiness -= happinessUpdateValue } else(happiness = 0);
-        if (hunger > 0) { hunger -= hungerUpdateValue } else(hunger = 0);
-        if (health > 0) { health -= healthUpdateValue } else(health = 0);
+        if (happiness > 4) { happiness -= happinessUpdateValue } else { happiness = 0 };
+        if (hunger > 1) { hunger -= hungerUpdateValue } else { hunger = 0 };
+        if (health > 3) { health -= healthUpdateValue } else { health = 0 };
         // console.log("update at " + gameLength);
 
         updatePicture();
@@ -119,7 +119,7 @@ function updatePicture() {
 
     if (50 > statTotal && statTotal >= 1) {
         goomyImageLibrary = 7;
-        displayLog("[" + gameLength + "] Goomy is in Distress");
+        displayLog("Goomy is in Distress");
     } else if (100 > statTotal && statTotal >= 50) {
         goomyImageLibrary = 6;
         displayLog("Goomy is Very Sad");
