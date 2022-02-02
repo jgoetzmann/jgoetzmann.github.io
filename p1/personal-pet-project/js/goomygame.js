@@ -34,7 +34,7 @@ goomyImageLibrary = 4;
 isDead = false;
 
 // Log values
-let logParagraph = document.getElementById("logParagraph");
+let logParagraph = document.getElementById("log-paragraph");
 const displayArray = ["<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>"];
 
 // Amuse onClick
