@@ -42,6 +42,7 @@ function amuseGoomy() {
     // console.log("Amuse Trigger");
     if (happiness >= 90) { happiness = 100 } else { happiness += 10 };
     // console.log("happines: " + happiness);
+    displayLog("You Amused Goomy!")
 }
 
 // Feed onClick
@@ -49,6 +50,7 @@ function feedGoomy() {
     // console.log("Feed Trigger");
     if (hunger >= 18) { hunger = 20 } else { hunger += 2 };
     // console.log("hunger: " + hunger);
+    displayLog("You Fed Goomy!")
 }
 
 // Heal onClick
@@ -56,6 +58,7 @@ function healGoomy() {
     // console.log("Heal Trigger");
     if (health >= 95) { health = 100 } else { health += 5 };
     // console.log("health: " + health);
+    displayLog("You Healed Goomy!")
 }
 
 // Calls from Full UI Refresh -- Updates Meters
@@ -119,28 +122,28 @@ function updatePicture() {
         displayLog("[" + gameLength + "] Goomy is in Distress");
     } else if (100 > statTotal && statTotal >= 50) {
         goomyImageLibrary = 6;
-        displayLog("[" + gameLength + "] Goomy is Very Sad");
+        displayLog("Goomy is Very Sad");
     } else if (133 > statTotal && statTotal >= 100) {
         goomyImageLibrary = 5;
-        displayLog("[" + gameLength + "] Goomy is Annoyed");
+        displayLog("Goomy is Annoyed");
     } else if (166 > statTotal && statTotal >= 133) {
         goomyImageLibrary = 4;
-        displayLog("[" + gameLength + "] Goomy is feeling OK");
+        displayLog("Goomy is feeling OK");
     } else if (200 > statTotal && statTotal >= 166) {
         goomyImageLibrary = 3;
-        displayLog("[" + gameLength + "] Goomy is Happy");
+        displayLog("Goomy is Happy");
     } else if (250 > statTotal && statTotal >= 200) {
         goomyImageLibrary = 2;
-        displayLog("[" + gameLength + "] Goomy is Very Happy!");
+        displayLog("Goomy is Very Happy!");
     } else if (300 > statTotal && statTotal >= 250) {
         goomyImageLibrary = 1;
-        displayLog("[" + gameLength + "] Goomy is falling for you!!!");
+        displayLog("Goomy is falling for you!!!");
     } else if (statTotal === 300) {
         goomyImageLibrary = 0;
-        displayLog("[" + gameLength + "] Goomy is God!!!!!");
+        displayLog("Goomy is God!!!!!");
     } else if (statTotal === 0) {
         goomyImageLibrary = 8;
-        displayLog("[" + gameLength + "] Goomy Fainted for Our Sins");
+        displayLog("Goomy Fainted for Our Sins");
         if (isDead === false) { death() };
     } else {
         console.log("Error")
@@ -162,7 +165,7 @@ function displayLog(message) {
 
     let userLog = "";
 
-    displayArray[0] = message + "<br><br>";
+    displayArray[0] = "[" + gameLength + "] " + message + "<br><br>";
 
     for (let i = 20; i >= 0; i--) {
         displayArray[i + 1] = displayArray[i];
