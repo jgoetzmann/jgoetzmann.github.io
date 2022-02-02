@@ -27,43 +27,31 @@
     </style>
 </head>
 
-<body style="height: 1080px; width: auto; border: 1px solid black; zoom: 80%;">
+<body style="height: 1080px; width: auto; border: 1px solid black; zoom: 75%; text-align: center;">
 
     <div style="position:absolute; top: 0px; left: 50px; text-align: left;">
         <h1>This is God, They are Goomy</h1>
-        <p>Goomy is life</p>
 
         <img id="goomy-image" src="images/goomy-neutral.jpg" alt="Your God">
     </div>
-    <div style="position:absolute; top: 350px; left: 50px; text-align:left; width: 398px; height: 450px;">
-        <h3>Goomy's Happiness</h3>
-        <meter id="hapiness-meter" min="0" max="100" value="50"></meter>
-        <p id="happiness-paragraph">50</p>
-        <button id="appease-button" onclick="amuseGoomy()">Amuse me!</button>
-        <h3>Goomy's Hunger</h3>
-        <meter id="hunger-meter" min="0" max="20" value="10"></meter>
-        <p id="hunger-paragraph">50</p>
-        <button id="hunger-button" onclick="feedGoomy()">Feed me!</button>
-        <h3>Goomy's Health</h3>
-        <meter id="health-meter" min="0" max="100" value="50"></meter>
-        <p id="health-paragraph">50</p>
-        <button id="health-button" onclick="healGoomy()">Heal me!</button>
+    <div id="game-ui" style="visibility: visible;">
+        <div style="position:absolute; top: 350px; left: 50px; text-align:left; width: 398px; height: 450px;">
+            <h3>Goomy's Happiness</h3>
+            <meter id="hapiness-meter" min="0" max="100" value="50"></meter>
+            <p id="happiness-paragraph">50</p>
+            <button id="appease-button" onclick="amuseGoomy()">Amuse me!</button>
+            <h3>Goomy's Hunger</h3>
+            <meter id="hunger-meter" min="0" max="20" value="10"></meter>
+            <p id="hunger-paragraph">50</p>
+            <button id="hunger-button" onclick="feedGoomy()">Feed me!</button>
+            <h3>Goomy's Health</h3>
+            <meter id="health-meter" min="0" max="100" value="50"></meter>
+            <p id="health-paragraph">50</p>
+            <button id="health-button" onclick="healGoomy()">Heal me!</button>
+        </div>
     </div>
-    <div style="position:absolute; top: 350px; left: 250px; text-align:left; width: 198; height: 450px;">
-        <h3 id="money">Money: 0</h3>
-        <h3>Inventory:</h3>
-        <p id="inventory"> Place holder<br>plac holders</p>
-    </div>
-    <div style="position:absolute; top: 0; left: 1100px; text-align: left;">
-        <p id="log" style="font-size: xx-large">heheheehaw</p>
-    </div>
-    <div style="position:absolute; top: 50; left: 525px; text-align: center;">
-        <h1 id="time">Time until next move must be inputed</h1>
-        <meter id="time-meter" min="0" max="30" value="30"></meter>
-        <br>
-        <br>
-        <h2>Shop</h2>
-        <button class="big" id="shop1 ">BIG BUTTON</button>
+    <div style="position:absolute; top: 0; left: 600px; text-align: left;">
+        <p id="logParagraph"></p>
     </div>
 
     <script src="js/goomygame.js "></script>

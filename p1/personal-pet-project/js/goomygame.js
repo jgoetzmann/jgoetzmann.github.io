@@ -1,10 +1,4 @@
-console.log("Hello World");
-
-const bp = [100, 200, 120, 800];
-const moves = ["Jay beam", "Rishay Punch", "Ethan Slam", "Soren Smack"];
-
-console.log(bp[0]);
-console.log(moves[0]);
+// Goomy Game Code:
 
 // Debug values
 let testGoomy = 0;
@@ -34,38 +28,37 @@ let hungerUpdateValue = .5;
 let healthUpdateValue = .5;
 
 // Image values 
-let goomyImage = document.getElementById("goomy-image")
+let goomyImage = document.getElementById("goomy-image");
 const goomyLibrary = ["images/goomy-god.png", "images/goomy-flushed.png", "images/goomy-very-happy.jpg", "images/goomy-happy.jpg", "images/goomy-neutral.jpg", "images/goomy-annoyed.jpeg", "images/goomy-very-sad.jpg", "images/goomy-distress.jpg", "images/goomy-dead.jpg"];
 goomyImageLibrary = 4;
+isDead = false;
 
-/*
-let happinessMeter = document.getElementById("hapiness-meter");
-let hungerMeter = document.getElementById("hunger-meter");
-let healthMeter = document.getElementById("health-meter");
-*/
+// Log values
+let logParagraph = document.getElementById("logParagraph");
+const displayArray = ["<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>", "<br>"];
 
 // Amuse onClick
 function amuseGoomy() {
-    console.log("Amuse Trigger");
+    // console.log("Amuse Trigger");
     if (happiness >= 90) { happiness = 100 } else { happiness += 10 };
-    console.log("happines: " + happiness);
+    // console.log("happines: " + happiness);
 }
 
-// Feed oncluck
+// Feed onClick
 function feedGoomy() {
-    console.log("Feed Trigger");
+    // console.log("Feed Trigger");
     if (hunger >= 18) { hunger = 20 } else { hunger += 2 };
-    console.log("hunger: " + hunger);
+    // console.log("hunger: " + hunger);
 }
 
 // Heal onClick
 function healGoomy() {
-    console.log("Heal Trigger");
+    // console.log("Heal Trigger");
     if (health >= 95) { health = 100 } else { health += 5 };
-    console.log("health: " + health);
+    // console.log("health: " + health);
 }
 
-// Updates UI
+// Calls from Full UI Refresh -- Updates Meters
 function refreshUI() {
     let happinessMeter = document.getElementById("hapiness-meter");
     let hungerMeter = document.getElementById("hunger-meter");
@@ -99,35 +92,89 @@ function refreshUI() {
 // Calls for Update every second
 setInterval(updateValues, 100);
 
-// Updates values
+// Calls from Above -- Calls for Full UI Refresh
 function updateValues() {
 
     if (Number.isInteger(gameLength / 10) === true) {
         if (happiness > 0) { happiness -= happinessUpdateValue };
         if (hunger > 0) { hunger -= hungerUpdateValue };
         if (health > 0) { health -= healthUpdateValue };
-        console.log("update at " + gameLength);
+        // console.log("update at " + gameLength);
 
         updatePicture();
     }
     refreshUI();
 
     gameLength += 1;
-    console.log(gameLength);
+    // console.log(gameLength);
+    // displayLog(gameLength);
 }
 
+// Calls from Full UI Refresh -- Updates Picture
 function updatePicture() {
     statTotal = happiness + health + (hunger * 5);
 
-    if (statTotal >= 1) { goomyImageLibrary = 7 };
-    if (statTotal >= 50) { goomyImageLibrary = 6 };
-    if (statTotal >= 100) { goomyImageLibrary = 5 };
-    if (statTotal >= 133) { goomyImageLibrary = 4 };
-    if (statTotal >= 166) { goomyImageLibrary = 3 };
-    if (statTotal >= 200) { goomyImageLibrary = 2 };
-    if (statTotal >= 250) { goomyImageLibrary = 1 };
-    if (statTotal === 300) { goomyImageLibrary = 0 };
-    if (statTotal === 0) { goomyImageLibrary = 8 };
+    if (50 > statTotal && statTotal >= 1) {
+        goomyImageLibrary = 7;
+        displayLog("[" + gameLength + "] Goomy is in Distress");
+    } else if (100 > statTotal && statTotal >= 50) {
+        goomyImageLibrary = 6;
+        displayLog("[" + gameLength + "] Goomy is Very Sad");
+    } else if (133 > statTotal && statTotal >= 100) {
+        goomyImageLibrary = 5;
+        displayLog("[" + gameLength + "] Goomy is Annoyed");
+    } else if (166 > statTotal && statTotal >= 133) {
+        goomyImageLibrary = 4;
+        displayLog("[" + gameLength + "] Goomy is feeling OK");
+    } else if (200 > statTotal && statTotal >= 166) {
+        goomyImageLibrary = 3;
+        displayLog("[" + gameLength + "] Goomy is Happy");
+    } else if (250 > statTotal && statTotal >= 200) {
+        goomyImageLibrary = 2;
+        displayLog("[" + gameLength + "] Goomy is Very Happy!");
+    } else if (300 > statTotal && statTotal >= 250) {
+        goomyImageLibrary = 1;
+        displayLog("[" + gameLength + "] Goomy is falling for you!!!");
+    } else if (statTotal === 300) {
+        goomyImageLibrary = 0;
+        displayLog("[" + gameLength + "] Goomy is God!!!!!");
+    } else if (statTotal === 0) {
+        goomyImageLibrary = 8;
+        displayLog("[" + gameLength + "] Goomy Fainted for Our Sins");
+        if (isDead === false) { death() };
+    } else {
+        console.log("Error")
+    }
 
     goomyImage.src = goomyLibrary[goomyImageLibrary];
+}
+
+// Gameover Function
+function death() {
+    let hideUI = document.getElementById("game-ui")
+    hideUI.style.visibility = "hidden";
+    alert("Goomy Fainted they lived for: " + Math.round(gameLength / 10) + " seconds!");
+    isDead = true;
+}
+
+// Calls from Anywhere -- Updates Log
+function displayLog(message) {
+
+    let userLog = "";
+
+    displayArray[0] = message + "<br><br>";
+
+    for (let i = 20; i >= 0; i--) {
+        displayArray[i + 1] = displayArray[i];
+    }
+
+    displayArray[0] = "<br> Your Log: <br> <br>"
+    delete displayArray[21];
+
+    for (let i = 0; i < 21; i++) {
+        userLog += displayArray[i];
+    }
+    logParagraph.innerHTML = userLog;
+
+    // console.log(displayArray);
 }
