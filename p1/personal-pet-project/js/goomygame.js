@@ -23,9 +23,9 @@ let hungerParagraph = document.getElementById("hunger-paragraph");
 let healthParagraph = document.getElementById("health-paragraph");
 
 // Update values (difficulty)
-let happinessUpdateValue = 1;
-let hungerUpdateValue = .5;
-let healthUpdateValue = .5;
+let happinessUpdateValue = 4;
+let hungerUpdateValue = 1;
+let healthUpdateValue = 3;
 
 // Image values 
 let goomyImage = document.getElementById("goomy-image");
@@ -99,9 +99,9 @@ setInterval(updateValues, 100);
 function updateValues() {
 
     if (Number.isInteger(gameLength / 10) === true) {
-        if (happiness > 0) { happiness -= happinessUpdateValue };
-        if (hunger > 0) { hunger -= hungerUpdateValue };
-        if (health > 0) { health -= healthUpdateValue };
+        if (happiness > 0) { happiness -= happinessUpdateValue } else(happiness = 0);
+        if (hunger > 0) { hunger -= hungerUpdateValue } else(hunger = 0);
+        if (health > 0) { health -= healthUpdateValue } else(health = 0);
         // console.log("update at " + gameLength);
 
         updatePicture();
