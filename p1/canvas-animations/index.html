@@ -8,10 +8,14 @@
     <title>Canvas Animations</title>
 </head>
 
-<body>
-    <h1>Canvas Animations Demo!</h1>
+<body onkeydown="keyPressed(event)" onkeyup="keyReleased(event)">
+    <p>Canvas Animations Demo!</p>
 
     <canvas id="canvas-animations" width="500" height="500" style="border: 1px solid #000000"></canvas>
+
+    <p id="keydown-output"></p>
+    <p id="keyup-output"></p>
+
     <script src="js/animations.js"></script>
 </body>
 
