@@ -13,6 +13,14 @@ let playerXDir = 0;
 let playerYDir = 0;
 let playerSpeed = 2;
 
+// ball position and movement
+let ballX = 250;
+let ballY = 250;
+let ballRadius = 20;
+let ballXDir = 1 + Math.random();
+let ballYDir = 1 + Math.random();
+let ballSpeed = 5;
+
 // key press
 function keyPressed(event) {
     let keydown = event.keyCode;
@@ -50,19 +58,62 @@ function keyReleased(event) {
     }
 }
 
+// updates block cords
+function movePlayer() {
+    if (playerX + (playerXDir * playerSpeed) <= 0 || playerX + (playerXDir * playerSpeed) >= 480) {
+        console.log("Collision");
+    } else {
+        playerX += playerXDir * playerSpeed;
+    }
+    if (playerY + (playerYDir * playerSpeed) <= 0 || playerY + (playerYDir * playerSpeed) >= 480) {
+        console.log("Collision");
+    } else {
+        playerY += playerYDir * playerSpeed;
+    }
+}
+
+// draws block from cords
 function drawPlayer() {
     ctx.fillRect(playerX, playerY, 20, 20);
 }
 
-function movePlayer() {
-    if (playerX <= 500 && playerX >= 0) { playerX += playerSpeed * playerXDir } else if (playerX > 500) { playerX = 500 } else if (playerX < 0) { playerX = 0 };
-    if (playerY <= 500 && playerY >= 0) { playerY += playerSpeed * playerYDir } else if (playerY > 500) { playerY = 500 } else if (playerY < 0) { playerY = 0 };
+function wallCollision(ballPosition, ballDir) {
+    if (ballPosition + (ballDir * ballSpeed) <= (ballRadius / 2) || ballPosition + (ballDir * ballSpeed) >= 500 - (ballRadius / 2)) {
+        return false;
+    } else {
+        return true;
+    }
 }
+
+// updates ball cords
+function moveBall() {
+    if (wallCollision(ballX, ballXDir) === true) {
+        ballX += ballXDir * ballSpeed;
+    } else {
+        ballXDir *= -1;
+    }
+    if (wallCollision(ballY, ballYDir) === true) {
+        ballY += ballYDir * ballSpeed;
+    } else {
+        ballYDir *= -1;
+    }
+}
+
+// draws ball from cords
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+    ctx.fill();
+}
+
+
 
 function refreshPlayer() {
     ctx.clearRect(0, 0, 500, 500);
     movePlayer();
+    moveBall();
     drawPlayer();
+    drawBall();
 }
 
 setInterval(refreshPlayer, 10);
