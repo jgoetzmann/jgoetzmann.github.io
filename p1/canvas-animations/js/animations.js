@@ -7,19 +7,26 @@ let keydownOutput = document.getElementById("keydown-output");
 let keyupOutput = document.getElementById("keyup-output");
 
 // play position and movement
-let playerX = 250;
-let playerY = 250;
 let playerXDir = 0;
 let playerYDir = 0;
 let playerSpeed = 2;
+let playerX = 250;
+let playerY = 250;
+const playerWidth = 20;
+const playerHeight = 20;
 
 // ball position and movement
 let ballX = 250;
 let ballY = 250;
-let ballRadius = 20;
 let ballXDir = 1 + Math.random();
 let ballYDir = 1 + Math.random();
 let ballSpeed = 5;
+const ballRadius = 20; // defying code norms constants should be lowercase change my mind
+
+// random number generater
+function randomNum() {
+    return -(Math.random() * (1.16 - 0.85) + 0.85);
+}
 
 // key press
 function keyPressed(event) {
@@ -74,7 +81,7 @@ function movePlayer() {
 
 // draws block from cords
 function drawPlayer() {
-    ctx.fillRect(playerX, playerY, 20, 20);
+    ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
 }
 
 function wallCollision(ballPosition, ballDir) {
@@ -85,17 +92,27 @@ function wallCollision(ballPosition, ballDir) {
     }
 }
 
+function playerCollision() {
+    if (ballX + ballRadius >= playerX && ballX - ballRadius <= playerX + playerWidth && ballY + ballRadius >= playerY && ballY - ballRadius <= playerY + playerWidth) {
+        ballXDir *= randomNum();
+        ballYDir *= randomNum();
+        return true;
+    }
+    return false;
+}
+
 // updates ball cords
 function moveBall() {
+    playerCollision();
     if (wallCollision(ballX, ballXDir) === true) {
         ballX += ballXDir * ballSpeed;
     } else {
-        ballXDir *= -1;
+        ballXDir *= randomNum();
     }
     if (wallCollision(ballY, ballYDir) === true) {
         ballY += ballYDir * ballSpeed;
     } else {
-        ballYDir *= -1;
+        ballYDir *= randomNum();
     }
 }
 
