@@ -2,15 +2,10 @@
 let map = document.getElementById("map");
 let ctx = map.getContext("2d");
 
-// draw map
-// ctx.fillStyle = "#808080";
-// ctx.fillRect(0, 230, 960, 20);
-
 // variables
 let money = 100;
-let round = 1;
-let death = false;
-let spawnType = 0;
+let lives = 200;
+let round = 1000;
 
 // enemy stats
 const data = [
@@ -23,21 +18,31 @@ const data = [
     [false, false] // dead
 ];
 
-/*
-for (i = 0; i < 5; i++) {
-    data[i].push(library[i][0]);
-}
-*/
+// spawn probability
+const spawns = [
+        ["nil", "tiny", "small", "small-f", "normal", "normal-s", "long", "large", "large-s", "vertical", "huge", "boss"], // name
+        [0, 10, 30, 30, 100, 300, 300, 500, 1500, 1500, 5000, 25000], // hp
+        [0, 100], // positionX
+        [0, 202.5], // positionY
+        [0, 0.2], // speed
+        [0, 75], // size
+        [true, false], // dead
+        [100, 0] // Spawn Chance
+    ]
+    // raw data grab
 for (i = 0; i < 5; i++) {
     console.log(data[i]);
 }
 
 function updatePosition(enemyID) {
     data[2][enemyID] += data[4][enemyID];
-    console.log(data[2][enemyID])
 }
 
-function spawnUnits() {}
+function spawnUnits() {
+    let roundUI = document.getElementById("round-ui");
+    roundUI.innerHTML = Math.floor(round / 1000)
+    round += 1;
+}
 
 function attack() {}
 
@@ -56,4 +61,4 @@ function refreshUI() {
     }
 }
 
-setInterval(refreshUI, 10)
+setInterval(refreshUI, 100)
