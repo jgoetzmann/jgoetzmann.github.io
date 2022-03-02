@@ -21,6 +21,8 @@ let button10 = document.getElementById("button10");
 let button11 = document.getElementById("button11");
 let button12 = document.getElementById("button12");
 
+let buttonCost1 = 25;
+
 // ui
 let roundUI = document.getElementById("round-ui");
 let moneyUI = document.getElementById("money-ui");
@@ -28,13 +30,13 @@ let livesUI = document.getElementById("lives-ui");
 
 // enemy stats
 const data = [
-    ["startA", "startA", "startB"], // name
-    [10, 10, 30], // hp
-    [-25, -75, -100], // positionX
-    [263, 225.7, 232], // positionY
-    [0.5, 0.5, 0.4], // speed
-    [5, 5, 10], // size
-    [false, false, false] // dead
+    [], // name
+    [], // hp
+    [], // positionX
+    [], // positionY
+    [], // speed
+    [], // size
+    [] // dead
 ];
 
 // spawn probability
@@ -42,7 +44,7 @@ const spawns = [
     ["nil", "tiny", "small", "small-f", "normal", "normal-f", "normal-s", "large", "large-f", "large-s", "huge", "boss"], // name
     [0, 10, 30, 30, 100, 100, 300, 500, 500, 1500, 5000, 25000], // hp
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionX
-    [0, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205, 205], // positionY
+    [0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200], // positionY
     [0, 0.5, 0.4, 1.2, 0.3, 0.9, 0.25, 0.2, 0.6, 0.17, 0.1, 0.05], // speed
     [0, 5, 10, 10, 20, 20, 20, 30, 30, 30, 50, 75], // size
     [true, false, false, false, false, false, false, false, false, false, false, false], // dead
@@ -69,12 +71,16 @@ showDebug();
 ///// Onclick Functions /////
 
 function purchase1() {
-    let randomTarget = Math.floor(Math.random() * data[6].length);
-    console.log("Purchase 1 Trigger");
-    if (money >= 25) {
-        money -= 25;
+    if (money >= buttonCost1 && data[0].length > 0) { // Check Money and Target Exists
+        money -= buttonCost1; // Taxes Money
+        let randomTarget = Math.floor(Math.random() * data[6].length); // Finds Target
         console.log("Killed " + data[0][randomTarget])
         data[6][randomTarget] = true;
+        buttonCost1 += 25;
+        console.log("Purchase 1 Success");
+        button1.innerHTML = "Kill Random! ($" + buttonCost1 + ")";
+    } else {
+        console.log("Purchase 1 Fail");
     }
 }
 
@@ -124,6 +130,10 @@ function purchase12() {
 
 ///// Timebased Functions /////
 
+// sets adds skew to spawns
+function positionOffset(size) {
+    return Math.random() * size + 200;
+}
 // updates positions
 function updatePosition(enemyID) {
     data[2][enemyID] += data[4][enemyID];
@@ -134,6 +144,30 @@ function spawnUnits() {
     round += 1;
     if (Number.isInteger(round / 30) === true) { // triggers every 3 secs
         let spawnChoice = unitChoice(); // finds what unit to select
+        switch (spawnChoice) {
+            case 11:
+                spawns[3][spawnChoice] = positionOffset(5);
+                break;
+            case 10:
+                spawns[3][spawnChoice] = positionOffset(30);
+                break;
+            case 9:
+            case 8:
+            case 7:
+                spawns[3][spawnChoice] = positionOffset(50);
+                break;
+            case 6:
+            case 5:
+            case 4:
+                spawns[3][spawnChoice] = positionOffset(60);
+                break;
+            case 3:
+            case 2:
+                spawns[3][spawnChoice] = positionOffset(70);
+                break;
+            case 1:
+                spawns[3][spawnChoice] = positionOffset(75);
+        }
         for (i = 0; i < 7; i++) {
             data[i].push(spawns[i][spawnChoice]); // adds to data array
         }
@@ -188,4 +222,4 @@ function refreshUI() {
 }
 
 // calls update every 1/10 second
-setInterval(refreshUI, 100)
+setInterval(refreshUI, 30)
