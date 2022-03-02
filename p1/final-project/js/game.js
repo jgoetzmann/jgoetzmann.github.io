@@ -7,6 +7,25 @@ let money = 100;
 let lives = 200;
 let round = 1000;
 
+// buttons
+let button1 = document.getElementById("button1");
+let button2 = document.getElementById("button2");
+let button3 = document.getElementById("button3");
+let button4 = document.getElementById("button4");
+let button5 = document.getElementById("button5");
+let button6 = document.getElementById("button6");
+let button7 = document.getElementById("button7");
+let button8 = document.getElementById("button8");
+let button9 = document.getElementById("button9");
+let button10 = document.getElementById("button10");
+let button11 = document.getElementById("button11");
+let button12 = document.getElementById("button12");
+
+// ui
+let roundUI = document.getElementById("round-ui");
+let moneyUI = document.getElementById("money-ui");
+let livesUI = document.getElementById("lives-ui");
+
 // enemy stats
 const data = [
     ["startA", "startA", "startB"], // name
@@ -39,8 +58,71 @@ function showDebug() {
     // spawn array debug
     console.log("Unit Library:");
     console.log(spawns);
+    // stats
+    console.log("round:" + round)
+    console.log("money:" + money)
+    console.log("lives:" + lives)
+
 }
 showDebug();
+
+///// Onclick Functions /////
+
+function purchase1() {
+    let randomTarget = Math.floor(Math.random() * data[6].length);
+    console.log("Purchase 1 Trigger");
+    if (money >= 25) {
+        money -= 25;
+        console.log("Killed " + data[0][randomTarget])
+        data[6][randomTarget] = true;
+    }
+}
+
+function purchase2() {
+    console.log("Purchase 2 Trigger")
+}
+
+function purchase3() {
+    console.log("Purchase 3 Trigger")
+}
+
+function purchase4() {
+    console.log("Purchase 4 Trigger")
+}
+
+function purchase5() {
+    console.log("Purchase 5 Trigger")
+}
+
+function purchase6() {
+    console.log("Purchase 6 Trigger")
+}
+
+function purchase7() {
+    console.log("Purchase 7 Trigger")
+}
+
+function purchase8() {
+    console.log("Purchase 8 Trigger")
+}
+
+function purchase9() {
+    console.log("Purchase 9 Trigger")
+}
+
+function purchase10() {
+    console.log("Purchase 10 Trigger")
+}
+
+function purchase11() {
+    console.log("Purchase 11 Trigger")
+}
+
+function purchase12() {
+    console.log("Purchase 12 Trigger")
+}
+
+///// Timebased Functions /////
 
 // updates positions
 function updatePosition(enemyID) {
@@ -49,8 +131,6 @@ function updatePosition(enemyID) {
 
 // spawns units and updates round
 function spawnUnits() {
-    let roundUI = document.getElementById("round-ui");
-    roundUI.innerHTML = Math.floor(round / 1000);
     round += 1;
     if (Number.isInteger(round / 30) === true) { // triggers every 3 secs
         let spawnChoice = unitChoice(); // finds what unit to select
@@ -102,6 +182,9 @@ function refreshUI() {
             ctx.fillRect(data[2][i], data[3][i], data[5][i], data[5][i]);
         }
     }
+    roundUI.innerHTML = "Round: " + Math.floor(round / 1000);
+    moneyUI.innerHTML = "Money: " + money;
+    livesUI.innerHTML = "Lives: " + lives;
 }
 
 // calls update every 1/10 second

@@ -26,25 +26,24 @@
     <canvas id="map" width="960" height="480" style="border: 1px solid #000000;background-color: green;"></canvas>
 
     <div style="position:absolute; top: 500px; left: 10px;">
-        <button type="button" onclick="purchase1()" class="big">Upgrade 1!</button>
-        <button type="button" onclick="purchase2()" class="big">Upgrade 2!</button>
-        <button type="button" onclick="purchase3()" class="big">Upgrade 3!</button>
-        <button type="button" onclick="purchase4()" class="big">Upgrade 4!</button>
-        <button type="button" onclick="purchase5()" class="big">Upgrade 5!</button>
-        <button type="button" onclick="purchase6()" class="big">Upgrade 6!</button>
+        <button id="button1" type="button" onclick="purchase1()" class="big">Kill Random!</button>
+        <button id="button2" type="button" onclick="purchase2()" class="big">Upgrade 2!</button>
+        <button id="button3" type="button" onclick="purchase3()" class="big">Upgrade 3!</button>
+        <button id="button4" type="button" onclick="purchase4()" class="big">Upgrade 4!</button>
+        <button id="button5" type="button" onclick="purchase5()" class="big">Upgrade 5!</button>
+        <button id="button6" type="button" onclick="purchase6()" class="big">Upgrade 6!</button>
     </div>
     <div style="position:absolute; top: 560px; left: 10px;">
-        <button type="button" onclick="purchase7()" class="big">Buy Spikes</button>
-        <button type="button" onclick="purchase8()" class="big">Upgrade 2!</button>
-        <button type="button" onclick="purchase9()" class="big">Upgrade 3!</button>
-        <button type="button" onclick="purchase10()" class="big">Upgrade 4!</button>
-        <button type="button" onclick="purchase11()" class="big">Upgrade 5!</button>
-        <button type="button" onclick="purchase12()" class="big">Upgrade 6!</button>
+        <button id="button7" type="button" onclick="purchase7()" class="big">Buy Spikes</button>
+        <button id="button8" type="button" onclick="purchase8()" class="big">Upgrade 2!</button>
+        <button id="button9" type="button" onclick="purchase9()" class="big">Upgrade 3!</button>
+        <button id="button10" type="button" onclick="purchase10()" class="big">Upgrade 4!</button>
+        <button id="button11" type="button" onclick="purchase11()" class="big">Upgrade 5!</button>
+        <button id="button12" type="button" onclick="purchase12()" class="big">Upgrade 6!</button>
     </div>
-    <div style="position:absolute; top: 10px; left: 10px;" id="round-ui"><br/>
-        <p id="money-ui"></p><br/>
-        <p id="lives-ui"></p>
-    </div>
+    <p style="position:absolute; top: 0px; left: 16px;" id="round-ui"></p>
+    <p style="position:absolute; top: 20px; left: 16px;" id="money-ui"></p>
+    <p style="position:absolute; top: 40px; left: 16px;" id="lives-ui"></p>
 
     <script src="js/game.js "></script>
 </body>
