@@ -26,6 +26,7 @@ let buttonCost7 = 50;
 let buttonCost8 = 100;
 
 // building level set
+let bankAmount = 1;
 let canonLevel = 1;
 let laserLevel = 1;
 let utilityLevel = 1;
@@ -34,6 +35,10 @@ let utilityLevel = 1;
 let roundUI = document.getElementById("round-ui");
 let moneyUI = document.getElementById("money-ui");
 let livesUI = document.getElementById("lives-ui");
+let bankUI = document.getElementById("bank-ui");
+let canonUI = document.getElementById("canon-ui");
+let laserUI = document.getElementById("laser-ui");
+let utilityUI = document.getElementById("utility-ui");
 
 // enemy stats
 const data = [
@@ -50,7 +55,7 @@ const data = [
 const spawns = [
     ["nil", "tiny", "small", "small-f", "normal", "normal-f", "normal-s", "large", "large-f", "large-s", "huge", "boss"], // name
     [0, 10, 30, 30, 100, 100, 300, 500, 500, 1500, 5000, 25000], // hp
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionX
+    [0, -10, -15, -15, -25, -25, -25, -35, -35, -35, -55, -80], // positionX
     [0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200], // positionY
     [0, 0.5, 0.4, 1.2, 0.3, 0.9, 0.25, 0.2, 0.6, 0.17, 0.1, 0.05], // speed
     [0, 5, 10, 10, 20, 20, 20, 30, 30, 30, 50, 75], // size
@@ -136,10 +141,10 @@ function purchase7() { // kill random
                 let randomTarget = Math.floor(Math.random() * data[6].length); // Finds Target
                 console.log("Killed " + data[0][randomTarget]); // logs people killed
                 data[6][randomTarget] = true; // sets death to true on target
-                clearData(); // clears data from array 
+                clearData(true); // clears data from array 
             }
         }
-        buttonCost7 += 50; // increases cost
+        buttonCost7 = Math.floor(((round / 10000) + 1) * buttonCost7) // increases cost
         console.log("Purchase 7 Success"); // logs success
         button7.innerHTML = "Kill Random! ($" + buttonCost7 + ")"; // updates ui
     } else {
@@ -158,7 +163,7 @@ function purchase8() { // slow all
         for (i = 0; i < data[0].length; i++) { // iterates through loop
             data[4][i] *= slowAmount; // slows speed of all units by slow amount
         }
-        buttonCost8 += 100; // increases cost
+        buttonCost8 = Math.floor(((round / 10000) + 1) * buttonCost8); // increases cost
         console.log("Purchase 8 Success"); // logs success
         button8.innerHTML = "Slow All! ($" + buttonCost8 + ")"; // updates ui
     } else {
@@ -188,14 +193,37 @@ function purchase12() {
 function positionOffset(size) {
     return Math.random() * size + 200;
 }
+
+// takes in size and returns lives that should be lost
+function livesCost(enemyID) {
+    switch (data[5][enemyID]) { // switches size of cube to deterime lives lost
+        case 75:
+            return 200;
+        case 50:
+            return 100;
+        case 30:
+            return 25;
+        case 20:
+            return 10;
+        case 10:
+            return 3;
+        case 5:
+            return 1;
+    }
+}
+
 // updates positions
 function updatePosition(enemyID) {
-    data[2][enemyID] += data[4][enemyID];
+    data[2][enemyID] += data[4][enemyID]; // adds speed to x value
+    if (data[2][enemyID] > 965) { // checks if cube is off screen
+        data[6][enemyID] = true; // kills cube
+        lives -= livesCost(enemyID); // subtracts lives
+        clearData(false);
+    }
 }
 
 // spawns units and updates round
 function spawnUnits() {
-    round += 1; // increases round
     if (Number.isInteger(round / 30) === true) { // triggers every 3 secs
         let spawnChoice = unitChoice(); // finds what unit to select
         switch (spawnChoice) { // calls position offset based on what type of cube it is
@@ -244,10 +272,12 @@ function unitChoice() {
 function attack() {}
 
 // clears array and awards money
-function clearData() {
+function clearData(deathMoney) {
     for (i = data[0].length; i >= 0; i--) { // runs through array back to front
         if (data[6][i] === true) { // checks if dead
-            money += data[5][i]; // awards money
+            if (deathMoney === true) { // checks if death money should be awarded
+                money += data[5][i] * (1 + bankAmount / 100); // awards money
+            }
             for (j = 0; j < 7; j++) { // selects all arrays of an index
                 data[j].splice(i, 1); // removes dead things from data array
             }
@@ -255,24 +285,37 @@ function clearData() {
     }
 }
 
+// updates stats on ui
+function refreshStatUI() {
+    roundUI.innerHTML = "Round: " + Math.floor(round / 1000); // updates round ui
+    moneyUI.innerHTML = "Money: " + Math.floor(money); // updates money ui
+    livesUI.innerHTML = "Lives: " + lives; // updates lives ui
+    bankUI.innerHTML = "Banks: " + bankAmount; // updates bank amount ui
+    canonUI.innerHTML = "Canon Level: " + canonLevel; // updates canon level ui
+    laserUI.innerHTML = "Laser Level: " + laserLevel; // updates laser level ui
+    utilityUI.innerHTML = "Utility Level: " + utilityLevel; // updates utility level ui
+}
+
 // calls position update, unit spawns, and attacks
 function refreshUI() {
+    round += 1; // increases round
     ctx.clearRect(0, 200, 960, 80); // clears middle rectangle
     ctx.fillStyle = "#808080"; // sets to gray
     ctx.fillRect(0, 200, 960, 80); // draws middle rectangle again
     ctx.fillStyle = "#ffffff"; // sets to white
     attack();
     spawnUnits();
-    clearData();
+    clearData(true);
     for (i = 0; i < data[0].length; i++) { // fail save for clearData
         if (data[6][i] === false) {
             updatePosition(i); // updates cube location
             ctx.fillRect(data[2][i], data[3][i], data[5][i], data[5][i]); // draws cubes
         }
     }
-    roundUI.innerHTML = "Round: " + Math.floor(round / 1000); // updates round ui
-    moneyUI.innerHTML = "Money: " + money; // updates money ui
-    livesUI.innerHTML = "Lives: " + lives; // updates lives ui
+    if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
+        money = money + 100 + round / 40 + (bankAmount * 10); // 100 + 50 * roundui + 10 * bankAmount
+    }
+    refreshStatUI();
 }
 
 // calls update every 1/10 second
