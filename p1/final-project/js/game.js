@@ -26,7 +26,7 @@ let buttonCost7 = 50;
 let buttonCost8 = 100;
 
 // building level set
-let bankAmount = 1;
+let bankAmount = 0;
 let canonLevel = 1;
 let laserLevel = 1;
 let utilityLevel = 1;
@@ -276,7 +276,7 @@ function clearData(deathMoney) {
     for (i = data[0].length; i >= 0; i--) { // runs through array back to front
         if (data[6][i] === true) { // checks if dead
             if (deathMoney === true) { // checks if death money should be awarded
-                money += data[5][i] * (1 + bankAmount / 100); // awards money
+                money += Math.floor(data[5][i] * (1 + bankAmount / 100)); // awards money
             }
             for (j = 0; j < 7; j++) { // selects all arrays of an index
                 data[j].splice(i, 1); // removes dead things from data array
@@ -319,4 +319,4 @@ function refreshUI() {
 }
 
 // calls update every 1/10 second
-setInterval(refreshUI, 30)
+setInterval(refreshUI, 30);
