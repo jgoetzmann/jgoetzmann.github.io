@@ -22,8 +22,18 @@ let button11 = document.getElementById("button11");
 let button12 = document.getElementById("button12");
 
 // button cost set
+let buttonCost1 = 100;
+let buttonCost2 = 300;
+let buttonCost3 = 1000;
+let buttonCost4 = 750;
+let buttonCost5 = 1500;
+let buttonCost6 = 3000;
 let buttonCost7 = 50;
 let buttonCost8 = 100;
+let buttonCost9 = 100;
+let buttonCost10 = 2500;
+let buttonCost11 = 2500;
+let buttonCost12 = 2500;
 
 // building level set
 let bankAmount = 0;
@@ -40,6 +50,9 @@ let canonUI = document.getElementById("canon-ui");
 let laserUI = document.getElementById("laser-ui");
 let utilityUI = document.getElementById("utility-ui");
 
+// jank stats to help with pushing values for buildings
+let xPush = 0;
+let yPush = 0;
 // enemy stats
 const data = [
     [], // name
@@ -65,72 +78,287 @@ const spawns = [
 // buildings on map
 const buildingData = [
     [], // name
+    [], // level
     [], // positionX
     [], // positionY
-    [], // size
+    [], // size (radius)
     [], // range
     [], // attackspeed
-    [], // damaage
+    [], // damage per shot
     [], // targets
-    [], // level
     [] // special ability
 ];
 
 const buildingSpawns = [
-    ["canon", "multi canon", "huge canon", "laser", "frost laser", "super laser", "bank", "canon upgrader", "laser upgrader", "utility upgrader"], // name
-    [canonLevel, canonLevel, canonLevel, laserLevel, laserLevel, laserLevel, utilityLevel, false, false, false], // level
-    [], // positionX
-    [], // positionY
-    [20, 30, 50, 20, 30, 50, 30, 30, 30, 30], // size
-    [], // range
-    [], // attackspeed
-    [], // damaage
-    [], // targets
-    [] // special ability
+    ["canon", "multi canon", "huge canon", "laser", "frost laser", "super laser"], // name
+    [canonLevel, canonLevel, canonLevel, laserLevel, laserLevel, laserLevel, utilityLevel], // level
+    [0, 0, 0, 0, 0, 0], // positionX
+    [0, 0, 0, 0, 0, 0], // positionY
+    [5, 7.5, 12.5, 5, 7.5, 12.5, ], // size (radius)
+    [50, 50, 50, 50, 50, 50], // range
+    [30, 30, 80, 5, 5, 200], // attackspeed
+    [5, 5, 200, 1, 0, 100], // damage per shot
+    [1, 3, 1, 1, 1, 1], // targets
+    [0, 1, 0, 2, 3, 4] // special ability
 ];
 
-// debug
-function showDebug() {
-    // data array debug
-    console.log("On Map Units:");
-    for (i = 0; i < 7; i++) {
-        console.log(data[i]);
-    }
-    // spawn array debug
-    console.log("Unit Library:");
-    console.log(spawns);
-    // stats
-    console.log("round:" + round)
-    console.log("money:" + money)
-    console.log("lives:" + lives)
 
+
+//// debug ////
+
+
+
+let updateUI = true; // updates UI
+
+function showUnits() { // prints units on map
+    console.log("On Map Units:");
+    for (i = 0; i < data[0].length; i++) { // loops through length of array
+        console.log(data[0][i]); // prints name
+    }
 }
-showDebug();
+
+function showBuilding() { // print buildings on map
+    console.log("On Map Buildings:");
+    for (i = 0; i < buildingData[0].length; i++) { // loops through length of array
+        console.log(buildingData[0][i]); // prints name
+    }
+}
+
+function showArrays() { // prints arrays
+    console.log("enemy array:");
+    console.log(data);
+    console.log("enemy spawn array:");
+    console.log(spawns);
+    console.log("building array:");
+    console.log(buildingData);
+    console.log("building spawn array:");
+    console.log(buildingSpawns);
+}
+
+function showStats() { // shows basic stats
+    console.log("round:" + round) // prints round
+    console.log("money:" + money) // prints money
+    console.log("lives:" + lives) // prints lives
+    console.log("banks:" + bankAmount) // prints bank amount
+    console.log("canonlevel:" + canonLevel) // prints canon level
+    console.log("laserlevel:" + laserLevel) // prints laser leve
+    console.log("utilitylevel:" + utilityLevel) // prints utility level
+}
+
+
+
+//// functions for buildings ////
+
+
+
+// cross references all buildings to make sure their isnt collision
+function positionBuildingTest(positionTestX, positionTestY, size) {
+    for (k = 0; k < buildingData[0].length; k++) {
+        let a = size + buildingData[4][k]; // adds radi of test circle and existing circles
+        let x = positionTestX - buildingData[2][k] // compares x Positions of what test circle and existing circles
+        let y = positionTestY - buildingData[3][k] // compares y Positions of what test circle and existing circles 
+        if (a > Math.sqrt((x * x) + (y * y))) { // simple circle collision test
+            return false; // if collision detected return false
+        }
+    }
+    console.log("Placement test success")
+    return true; // returns true if no collision
+}
+// takes range and size of to generate position to place then checks for collision
+function buildingPlacement(range, size) {
+    for (j = 0; j < 100; j++) { // tries to place building 100 times
+        let positionTestX = Math.floor(Math.random() * 960) + 1; // finds x value between 0 and 960
+        let positionTestY = Math.floor(Math.random() * (80 + (range - 10) * 2)) + 1; // returns number 1 - (80 + 2(range - 10))
+        positionTestY += (200 - range) // adds 200 - range to make sure that building is in range of track
+            // following line tests current buildings against new one being placed and makes sure Y is not in track
+        if (positionBuildingTest(positionTestX, positionTestY, size) === true && (positionTestY < (200 - size) || positionTestY > (280 + size))) {
+            xPush = positionTestX;
+            yPush = positionTestY;
+            return true; // retruns true if no collision found
+        }
+    }
+    console.log("Placement fail") // logs failed placement
+    return false; // if cube fails to pass collision test 100 times then returns false
+}
+
+// draws building size on field
+function drawBuilding(buildingSelection) {
+    let buildingTrace = buildingData[0].length - 1; // finds length to find index of most recent addition to array
+    ctx.beginPath(); // starts path
+    ctx.arc(buildingData[2][buildingTrace], buildingData[3][buildingTrace], buildingData[4][buildingTrace], 0, 2 * Math.PI); // draws circle
+    switch (buildingSelection) { // changes color based on building type
+        case 0: // canon
+            ctx.fillStyle = "#feb1b1"; // color
+            break;
+        case 1: // multi canon
+            ctx.fillStyle = "#ff8080"; // color
+            break;
+        case 2: // huge canon
+            ctx.fillStyle = "#ff4f4f"; // color
+            break;
+        case 3: // laser
+            ctx.fillStyle = "#b5e2ff"; // color
+            break;
+        case 4: // frost laser
+            ctx.fillStyle = "#6ac5fe"; // color
+            break;
+        case 5: // super laser
+            ctx.fillStyle = "#3792cb"; // color
+            break;
+        default:
+            ctx.fillStyle = "#ffffff"; // color
+    }
+    ctx.fill(); // draws line
+}
+
+
 
 ///// Onclick Functions /////
 
-function purchase1() {
-    console.log("Purchase 1 Trigger")
+
+
+function purchase1() { // canon
+    let buildingType = 0; // what building you are spawning
+    xPush = 0; // refresh x push value
+    yPush = 0; // refresh y push value
+    if (money >= buttonCost1 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+        money -= buttonCost1; // taxes money
+        for (i = 0; i < 9; i++) { // loops through array to push to data
+            if (i === 2) { // checks if i is push x cords
+                buildingData[i].push(xPush); // pushes correcy x cords
+            } else if (i === 3) { // checks if i is push y cords
+                buildingData[i].push(yPush); // pushes correcy y cords
+            } else { // pushes cords based on array value if not cords
+                buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
+            }
+        }
+        buttonCost1 += 100; // increases cost
+        console.log("Purchase 1 Success"); // logs success
+        button1.innerHTML = "Buy Canon! ($" + buttonCost1 + ")"; // updates ui
+        drawBuilding(buildingType); // draws building
+    } else {
+        console.log("Purchase 1 Fail"); // logs fail
+    }
 }
 
-function purchase2() {
-    console.log("Purchase 2 Trigger")
+function purchase2() { // multi canon
+    let buildingType = 1; // what building you are spawning
+    xPush = 0; // refresh x push value
+    yPush = 0; // refresh y push value
+    if (money >= buttonCost2 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+        money -= buttonCost2; // taxes money
+        for (i = 0; i < 9; i++) { // loops through array to push to data
+            if (i === 2) { // checks if i is push x cords
+                buildingData[i].push(xPush); // pushes correcy x cords
+            } else if (i === 3) { // checks if i is push y cords
+                buildingData[i].push(yPush); // pushes correcy y cords
+            } else { // pushes cords based on array value if not cords
+                buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
+            }
+        }
+        buttonCost2 += 300; // increases cost
+        console.log("Purchase 2 Success"); // logs success
+        button2.innerHTML = "Buy Multi Canon! ($" + buttonCost2 + ")"; // updates ui
+        drawBuilding(buildingType); // draws building
+    } else {
+        console.log("Purchase 2 Fail"); // logs fail
+    }
 }
 
-function purchase3() {
-    console.log("Purchase 3 Trigger")
+function purchase3() { // huge canon
+    let buildingType = 2; // what building you are spawning
+    xPush = 0; // refresh x push value
+    yPush = 0; // refresh y push value
+    if (money >= buttonCost3 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+        money -= buttonCost3; // taxes money
+        for (i = 0; i < 9; i++) { // loops through array to push to data
+            if (i === 2) { // checks if i is push x cords
+                buildingData[i].push(xPush); // pushes correcy x cords
+            } else if (i === 3) { // checks if i is push y cords
+                buildingData[i].push(yPush); // pushes correcy y cords
+            } else { // pushes cords based on array value if not cords
+                buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
+            }
+        }
+        buttonCost3 += 1000; // increases cost
+        console.log("Purchase 3 Success"); // logs success
+        button3.innerHTML = "Buy Huge Canon! ($" + buttonCost3 + ")"; // updates ui
+        drawBuilding(buildingType); // draws building
+    } else {
+        console.log("Purchase 3 Fail"); // logs fail
+    }
 }
 
-function purchase4() {
-    console.log("Purchase 4 Trigger")
+function purchase4() { // laser
+    let buildingType = 3; // what building you are spawning
+    xPush = 0; // refresh x push value
+    yPush = 0; // refresh y push value
+    if (money >= buttonCost4 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+        money -= buttonCost4; // taxes money
+        for (i = 0; i < 9; i++) { // loops through array to push to data
+            if (i === 2) { // checks if i is push x cords
+                buildingData[i].push(xPush); // pushes correcy x cords
+            } else if (i === 3) { // checks if i is push y cords
+                buildingData[i].push(yPush); // pushes correcy y cords
+            } else { // pushes cords based on array value if not cords
+                buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
+            }
+        }
+        buttonCost4 += 750; // increases cost
+        console.log("Purchase 4 Success"); // logs success
+        button4.innerHTML = "Buy Laser! ($" + buttonCost4 + ")"; // updates ui
+        drawBuilding(buildingType); // draws building
+    } else {
+        console.log("Purchase 4 Fail"); // logs fail
+    }
 }
 
-function purchase5() {
-    console.log("Purchase 5 Trigger")
+function purchase5() { // frost laser
+    let buildingType = 4; // what building you are spawning
+    xPush = 0; // refresh x push value
+    yPush = 0; // refresh y push value
+    if (money >= buttonCost5 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+        money -= buttonCost5; // taxes money
+        for (i = 0; i < 9; i++) { // loops through array to push to data
+            if (i === 2) { // checks if i is push x cords
+                buildingData[i].push(xPush); // pushes correcy x cords
+            } else if (i === 3) { // checks if i is push y cords
+                buildingData[i].push(yPush); // pushes correcy y cords
+            } else { // pushes cords based on array value if not cords
+                buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
+            }
+        }
+        buttonCost5 += 1500; // increases cost
+        console.log("Purchase 5 Success"); // logs success
+        button5.innerHTML = "Buy Frost Laser! ($" + buttonCost5 + ")"; // updates ui
+        drawBuilding(buildingType); // draws building
+    } else {
+        console.log("Purchase 5 Fail"); // logs fail
+    }
 }
 
-function purchase6() {
-    console.log("Purchase 6 Trigger")
+function purchase6() { // super laser
+    let buildingType = 5; // what building you are spawning
+    xPush = 0; // refresh x push value
+    yPush = 0; // refresh y push value
+    if (money >= buttonCost6 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+        money -= buttonCost6; // taxes money
+        for (i = 0; i < 9; i++) { // loops through array to push to data
+            if (i === 2) { // checks if i is push x cords
+                buildingData[i].push(xPush); // pushes correcy x cords
+            } else if (i === 3) { // checks if i is push y cords
+                buildingData[i].push(yPush); // pushes correcy y cords
+            } else { // pushes cords based on array value if not cords
+                buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
+            }
+        }
+        buttonCost6 += 3000; // increases cost
+        console.log("Purchase 6 Success"); // logs success
+        button6.innerHTML = "Buy Super Laser! ($" + buttonCost6 + ")"; // updates ui
+        drawBuilding(buildingType); // draws building
+    } else {
+        console.log("Purchase 6 Fail"); // logs fail
+    }
 }
 
 function purchase7() { // kill random
@@ -171,23 +399,59 @@ function purchase8() { // slow all
     }
 }
 
-function purchase9() {
-    console.log("Purchase 9 Trigger")
+function purchase9() { // bank
+    if (money >= buttonCost9) { // Check Money
+        money -= buttonCost9; // taxes money
+        bankAmount += 1; //adds bank
+        buttonCost9 += 10; // increases cost
+        console.log("Purchase 9 Success"); // logs success
+        button9.innerHTML = "Buy Bank! ($" + buttonCost9 + ")"; // updates ui
+    } else {
+        console.log("Purchase 9 Fail"); // logs fail
+    }
 }
 
-function purchase10() {
-    console.log("Purchase 10 Trigger")
+function purchase10() { // canon upgrade
+    if (money >= buttonCost10) { // Check Money
+        money -= buttonCost10; // taxes money
+        canonLevel += 1; //adds canon level
+        buttonCost10 += 2500; // increases cost
+        console.log("Purchase 10 Success"); // logs success
+        button10.innerHTML = "Upgrade Canons! ($" + buttonCost10 + ")"; // updates ui
+    } else {
+        console.log("Purchase 10 Fail"); // logs fail
+    }
 }
 
-function purchase11() {
-    console.log("Purchase 11 Trigger")
+function purchase11() { // laser upgrade
+    if (money >= buttonCost11) { // Check Money
+        money -= buttonCost11; // taxes money
+        laserLevel += 1; //adds laser level
+        buttonCost11 += 2500; // increases cost
+        console.log("Purchase 11 Success"); // logs success
+        button11.innerHTML = "Upgrade Lasers! ($" + buttonCost11 + ")"; // updates ui
+    } else {
+        console.log("Purchase 11 Fail"); // logs fail
+    }
 }
 
-function purchase12() {
-    console.log("Purchase 12 Trigger")
+function purchase12() { // utility upgrade
+    if (money >= buttonCost12) { // Check Money
+        money -= buttonCost12; // taxes money
+        utilityLevel += 1; //adds utility level
+        buttonCost12 += 2500; // increases cost
+        console.log("Purchase 12 Success"); // logs success
+        button12.innerHTML = "Upgrade Utility! ($" + buttonCost12 + ")"; // updates ui
+    } else {
+        console.log("Purchase 12 Fail"); // logs fail
+    }
 }
+
+
 
 ///// Timebased Functions /////
+
+
 
 // sets adds skew to spawns
 function positionOffset(size) {
@@ -212,13 +476,13 @@ function livesCost(enemyID) {
     }
 }
 
-// updates positions
+// updates positions and subtracts lives
 function updatePosition(enemyID) {
     data[2][enemyID] += data[4][enemyID]; // adds speed to x value
     if (data[2][enemyID] > 965) { // checks if cube is off screen
         data[6][enemyID] = true; // kills cube
         lives -= livesCost(enemyID); // subtracts lives
-        clearData(false);
+        clearData(false); // cleans array without awarding cash
     }
 }
 
@@ -296,26 +560,33 @@ function refreshStatUI() {
     utilityUI.innerHTML = "Utility Level: " + utilityLevel; // updates utility level ui
 }
 
+// clears path of enemies then redraws it
+function clearMap() {
+    ctx.clearRect(0, 200, 960, 80); // clears middle rectangle
+    ctx.fillStyle = "#dee1e6"; // sets to gray
+    ctx.fillRect(0, 200, 960, 80); // draws middle rectangle again
+    ctx.fillStyle = "#232323"; // sets to white
+}
+
 // calls position update, unit spawns, and attacks
 function refreshUI() {
-    round += 1; // increases round
-    ctx.clearRect(0, 200, 960, 80); // clears middle rectangle
-    ctx.fillStyle = "#808080"; // sets to gray
-    ctx.fillRect(0, 200, 960, 80); // draws middle rectangle again
-    ctx.fillStyle = "#ffffff"; // sets to white
-    attack();
-    spawnUnits();
-    clearData(true);
-    for (i = 0; i < data[0].length; i++) { // fail save for clearData
-        if (data[6][i] === false) {
-            updatePosition(i); // updates cube location
-            ctx.fillRect(data[2][i], data[3][i], data[5][i], data[5][i]); // draws cubes
+    if (updateUI === true) {
+        round += 1; // increases round
+        clearMap();
+        attack();
+        spawnUnits();
+        clearData(true);
+        for (i = 0; i < data[0].length; i++) { // fail save for clearData
+            if (data[6][i] === false) {
+                updatePosition(i); // updates cube location
+                ctx.fillRect(data[2][i], data[3][i], data[5][i], data[5][i]); // draws cubes
+            }
         }
+        if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
+            money = money + 100 + round / 40 + (bankAmount * 20); // 100 + 50 * roundui + 10 * bankAmount
+        }
+        refreshStatUI();
     }
-    if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
-        money = money + 100 + round / 40 + (bankAmount * 10); // 100 + 50 * roundui + 10 * bankAmount
-    }
-    refreshStatUI();
 }
 
 // calls update every 1/10 second
