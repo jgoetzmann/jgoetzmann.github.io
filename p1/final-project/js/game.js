@@ -36,7 +36,7 @@ let buttonCost11 = 2500;
 let buttonCost12 = 2500;
 
 // building level set
-let bankAmount = 5;
+let bankAmount = 0;
 let canonLevel = 1;
 let laserLevel = 1;
 let utilityLevel = 1;
@@ -448,7 +448,7 @@ function purchase9() { // bank
     if (money >= buttonCost9) { // Check Money
         money -= buttonCost9; // taxes money
         bankAmount += 1; //adds bank
-        buttonCost9 += 10; // increases cost
+        buttonCost9 += 20; // increases cost
         console.log("Purchase 9 Success"); // logs success
         button9.innerHTML = "Buy Bank! ($" + buttonCost9 + ")"; // updates ui
     } else {
@@ -744,15 +744,15 @@ function attack() {
                     let enemyTarget = 0; // resets target
                     switch (buildingData[9][i]) {
                         case 0:
-                        case 2:
+                        case 4:
                             enemyTarget = findEnemy(i, 1); // first
                             break;
                         case 5:
                         case 1:
-                        case 4:
                             enemyTarget = findEnemy(i, 2); // random
                             break;
                         case 3:
+                        case 2:
                             enemyTarget = findEnemy(i, 0); // strong
                     }
                     if (enemyTarget !== false) { // makes sure that enemy target is not false
@@ -804,7 +804,7 @@ function clearData(deathMoney) {
     for (i = data[0].length; i >= 0; i--) { // runs through array back to front
         if (data[6][i] === true || data[1][i] < 1) { // checks if dead or has <1 hp
             if (deathMoney === true) { // checks if death money should be awarded
-                money += Math.floor(data[5][i] * (1 + bankAmount / 100)); // awards money
+                money += Math.floor(data[5][i] * 2 * (1 + (bankAmount * 2) / 100)); // awards money
             }
             for (j = 0; j < 7; j++) { // selects all arrays of an index
                 data[j].splice(i, 1); // removes dead things from data array
@@ -836,7 +836,7 @@ function clearMap() {
 // end of round cash
 function endRoundCash() {
     if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
-        money = money + 100 + round / 40 + (bankAmount * 20); // 100 + 50 * roundui + 10 * bankAmount
+        money = money + 100 + round / 40 + (bankAmount * 50); // 100 + 50 * roundui + 10 * bankAmount
     }
 }
 
