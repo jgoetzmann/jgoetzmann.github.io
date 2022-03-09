@@ -857,6 +857,9 @@ function refreshUI() {
             lives = "Dead"; // sets lives to dead
             refreshStatUI(); // updates stats at the very end
         }
+        if (round === 69000) { // win game trigger
+            alert("Congradulations on Beating the Game! Every Round that went by was 100 Seconds Wasted in you Life! If you got here Legit Goodjob if not you Found an Exploit yay! You may Continue on in Freeplay and Flex on your Friends!")
+        }
     }
 }
 
