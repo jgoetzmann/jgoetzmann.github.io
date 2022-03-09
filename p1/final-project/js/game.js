@@ -25,7 +25,7 @@ let button12 = document.getElementById("button12");
 let buttonCost1 = 0;
 let buttonCost2 = 300;
 let buttonCost3 = 1000;
-let buttonCost4 = 750;
+let buttonCost4 = 500;
 let buttonCost5 = 1500;
 let buttonCost6 = 3000;
 let buttonCost7 = 50;
@@ -95,9 +95,9 @@ const buildingSpawns = [
     [0, 0, 0, 0, 0, 0], // positionX
     [0, 0, 0, 0, 0, 0], // positionY
     [5, 7.5, 12.5, 5, 7.5, 12.5, ], // size (radius)
-    [50, 30, 150, 60, 20, 100], // range
+    [50, 30, 100, 60, 20, 100], // range
     [30, 30, 80, 5, 5, 300], // attackspeed
-    [5, 5, 200, 1, 0.9, 50], // damage per shot
+    [5, 5, 250, 3, 0.9, 50], // damage per shot
     [1, 3, 1, 1, 1, 10], // targets
     [0, 1, 2, 3, 4, 5] // special ability and id
 ];
@@ -173,7 +173,7 @@ function buildingPlacement(range, size) {
         let positionTestY = Math.floor(Math.random() * (80 + (range - 10) * 2)) + 1; // returns number 1 - (80 + 2(range - 10))
         positionTestY += (210 - range) // adds 200 - range to make sure that building is in range of track
             // following line tests current buildings against new one being placed and makes sure Y is not in track
-        if (positionBuildingTest(positionTestX, positionTestY, size) === true && (positionTestY < (200 - size) || positionTestY > (280 + size))) {
+        if (positionTestY < 1080 && positionTestY > 0 && positionBuildingTest(positionTestX, positionTestY, size) === true && (positionTestY < (200 - size) || positionTestY > (280 + size))) {
             xPush = positionTestX;
             yPush = positionTestY;
             return true; // retruns true if no collision found
@@ -189,38 +189,36 @@ function canonUpgrade() {
         if (i === 0) { // canon
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[5][i] += 10; // damage per hit
-            buildingSpawns[6][i] -= Math.ceil(0.8 * buildingSpawns[6][i] - 0.7); // attack speed
-            buildingSpawns[7][i] += 5; // range
+            buildingSpawns[6][i] -= 3; // attack speed
+            if (buildingSpawns[6][i] < 5) { buildingSpawns[6][i] = 5 } // sets attackspeed to laser speed if too low
+            buildingSpawns[7][i] += 10; // range
         } else if (i === 1) { // multi canon
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[5][i] += 5; // damage per hit
-            buildingSpawns[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingSpawns[7][i] += 5; // range
             buildingSpawns[8][i] += 1; // targets
         } else if (i === 2) { // huge canon
             buildingSpawns[1][i] += 1; // level
-            buildingSpawns[5][i] += 100; // damage per hit
-            buildingSpawns[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
-            buildingSpawns[7][i] += 15; // range
+            buildingSpawns[5][i] += 150; // damage per hit
+            buildingSpawns[7][i] += 20; // range
         }
     }
     for (i = 0; i < buildingData[0].length; i++) { // iterates through canons on field
         if (buildingData[9][i] === 0) { // canon
             buildingData[1][i] += 1; // level
             buildingData[5][i] += 10; // damage per hit
-            buildingData[6][i] -= Math.ceil(0.8 * buildingSpawns[6][i] - 0.7); // attack speed
-            buildingData[7][i] += 5; // range
+            buildingData[6][i] -= 3; // attack speed
+            if (buildingData[6][i] < 5) { buildingData[6][i] = 5 } // sets attackspeed to laser speed if too low
+            buildingData[7][i] += 10; // range
         } else if (buildingData[9][i] === 1) { // multi canon
             buildingData[1][i] += 1; // level
             buildingData[5][i] += 5; // damage per hit
-            buildingData[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingData[7][i] += 5; // range
             buildingData[8][i] += 1; // targets
         } else if (buildingData[9][i] === 2) { // huge canon
             buildingData[1][i] += 1; // level
-            buildingData[5][i] += 50; // damage per hit
-            buildingData[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
-            buildingData[7][i] += 15; // range
+            buildingData[5][i] += 150; // damage per hit
+            buildingData[7][i] += 20; // range
         }
     }
 }
@@ -230,7 +228,7 @@ function laserUpgrade() {
     for (i = 3; i < 6; i++) { // 3 iterations
         if (i === 3) { // laser
             buildingSpawns[1][i] += 1; // level
-            buildingSpawns[5][i] += 2; // % damage per hit
+            buildingSpawns[5][i] += 3; // % damage per hit
             buildingSpawns[7][i] += 5; // range
         } else if (i === 4) { // frost laser
             buildingSpawns[1][i] += 1; // level
@@ -247,7 +245,7 @@ function laserUpgrade() {
     for (i = 3; i < buildingData[0].length; i++) { // iterates through lasers on field
         if (buildingData[9][i] === 3) { // laser
             buildingData[1][i] += 1; // level
-            buildingData[5][i] += 2; // % damage per hit
+            buildingData[5][i] += 3; // % damage per hit
             buildingData[7][i] += 5; // range
         } else if (buildingData[9][i] === 4) { // frost laser
             buildingData[1][i] += 1; // level
@@ -353,7 +351,7 @@ function purchase4() { // laser
                 buildingData[i].push(buildingSpawns[i][buildingType]); // adds to data array
             }
         }
-        buttonCost4 += 750; // increases cost
+        buttonCost4 += 500; // increases cost
         console.log("Purchase 4 Success"); // logs success
         button4.innerHTML = "Buy Laser! ($" + buttonCost4 + ")"; // updates ui
     } else {
@@ -415,7 +413,7 @@ function purchase7() { // kill random
                 let randomTarget = Math.floor(Math.random() * data[6].length); // Finds Target
                 console.log("Killed " + data[0][randomTarget]); // logs people killed
                 data[6][randomTarget] = true; // sets death to true on target
-                clearData(true); // clears data from array 
+                clearData(false); // clears data from array 
             }
         }
         buttonCost7 += (Math.floor(round / 1000) * 5); // increases cost
