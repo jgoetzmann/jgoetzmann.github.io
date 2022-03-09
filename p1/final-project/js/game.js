@@ -804,7 +804,7 @@ function clearData(deathMoney) {
     for (i = data[0].length; i >= 0; i--) { // runs through array back to front
         if (data[6][i] === true || data[1][i] < 1) { // checks if dead or has <1 hp
             if (deathMoney === true) { // checks if death money should be awarded
-                money += Math.floor(data[5][i] * 2 * (1 + (bankAmount * 2) / 100)); // awards money
+                money += Math.floor(data[5][i] * 2 * (1 + (bankAmount * utilityLevel) / 100)); // awards money
             }
             for (j = 0; j < 7; j++) { // selects all arrays of an index
                 data[j].splice(i, 1); // removes dead things from data array
@@ -836,7 +836,7 @@ function clearMap() {
 // end of round cash
 function endRoundCash() {
     if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
-        money = money + 100 + round / 40 + (bankAmount * 50); // 100 + 50 * roundui + 10 * bankAmount
+        money = money + 100 + round / 40 + (bankAmount * (50 * (utilityLevel / 2))); // 100 + 50 * roundui + 10 * bankAmount
     }
 }
 
