@@ -234,8 +234,7 @@ function laserUpgrade() {
             buildingSpawns[7][i] += 5; // range
         } else if (i === 4) { // frost laser
             buildingSpawns[1][i] += 1; // level
-            buildingSpawns[7][i] += 5; // range
-            buildingSpawns[8][i] += 1; // targets
+            buildingSpawns[7][i] += 10; // range
         } else if (i === 5) { // super laser
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[5][i] += 10; // damage per hit
@@ -525,12 +524,16 @@ function livesCost(enemyID) {
 }
 
 // updates positions and subtracts lives
-function updatePosition(enemyID) {
-    data[2][enemyID] += data[4][enemyID]; // adds speed to x value
-    if (data[2][enemyID] > 965) { // checks if cube is off screen
-        data[6][enemyID] = true; // kills cube
-        lives -= livesCost(enemyID); // subtracts lives
-        clearData(false); // cleans array without awarding cash
+function updatePosition() {
+    ctx.fillStyle = "#232323"; // sets to white
+    for (i = 0; i < data[0].length; i++) { // iterates through array
+        data[2][i] += data[4][i]; // adds speed to x value
+        if (data[2][i] > 965) { // checks if cube is off screen
+            data[6][i] = true; // kills cube
+            lives -= livesCost(i); // subtracts lives
+            clearData(false); // cleans array without awarding cash
+        }
+        ctx.fillRect(data[2][i], data[3][i], data[5][i], data[5][i]); // draws cubes
     }
 }
 
@@ -541,6 +544,7 @@ function spawnUnits() {
         switch (spawnChoice) { // calls position offset based on what type of cube it is
             case 11: // boss
                 spawns[3][spawnChoice] = positionOffset(5);
+                spawns[1][11] = Math.floor(1.05 * spawns[1][11]); // scales boss hp
                 break;
             case 10: // huge
                 spawns[3][spawnChoice] = positionOffset(30);
@@ -595,12 +599,11 @@ function drawBuilding() {
                     ctx.fillStyle = "#3792cb"; // color
                     break;
                 default:
-                    ctx.fillStyle = "#ffffff"; // color
+                    ctx.fillStyle = "#232323"; // sets to white
             }
             ctx.fill(); // draws line
         }
     }
-    ctx.fillStyle = "#232323"; // sets to white
 }
 
 // random selection of unit
@@ -627,6 +630,44 @@ function collisionAttackCheck(c1x, c1y, r1, c2x, c2y, r2) {
     } else {
         return false; // returns false if no collision
     }
+}
+
+// draw projectiles for animations
+function drawProjectiles(towerX, towerY, enemyX, enmeyY, towerShot) {
+    switch (towerShot) {
+        case 0: // canon
+            ctx.strokeStyle = "#feb1b1"; // color
+            ctx.lineWidth = 3;
+            break;
+        case 1: // multi canon
+            ctx.strokeStyle = "#ff8080"; // color
+            ctx.lineWidth = 3;
+            break;
+        case 2: // huge canon
+            ctx.strokeStyle = "#ff4f4f"; // color
+            ctx.lineWidth = 10;
+            break;
+        case 3: // laser
+            ctx.strokeStyle = "#b5e2ff"; // color
+            ctx.lineWidth = 1;
+            break;
+        case 4: // frost laser
+            ctx.strokeStyle = "#6ac5fe"; // color
+            ctx.lineWidth = 1;
+            break;
+        case 5: // super laser
+            ctx.strokeStyle = "#3792cb"; // color
+            ctx.lineWidth = 1;
+            break;
+        default:
+            ctx.strokeStyle = "#232323"; // sets to white
+            ctx.lineWidth = 5;
+    }
+
+    ctx.beginPath(); // begins line
+    ctx.moveTo(towerX, towerY); // starts line
+    ctx.lineTo(enemyX, enmeyY); // end line
+    ctx.stroke(); // draw line
 }
 
 // find enemy for attack 
@@ -682,12 +723,12 @@ function findEnemy(positionDerive, mode) {
         return false; // returns false if no target found
     } else if (mode === 2) { // if target random
         for (j = 0; j < 100; j++) {
-            let m = Math.floor(Math.random() * data[0].length)
-            let circle2X = data[2][m] + (data[5][m] / 2); // finds center of x of cube
-            let circle2Y = data[3][m] + (data[5][m] / 2); // finds center of y of cube
-            let circle2Radi = data[5][m] / 2 // find radi
+            let targetSlection = Math.floor(Math.random() * data[0].length)
+            let circle2X = data[2][targetSlection] + (data[5][targetSlection] / 2); // finds center of x of cube
+            let circle2Y = data[3][targetSlection] + (data[5][targetSlection] / 2); // finds center of y of cube
+            let circle2Radi = data[5][targetSlection] / 2 // find radi
             if (collisionAttackCheck(positionXAttack, positionYAttack, rangeAttack, circle2X, circle2Y, circle2Radi) === true) { // finds units ordering from oldest to newist
-                return j; // returns target
+                return targetSlection; // returns target
             }
         }
         return false;
@@ -703,31 +744,51 @@ function attack() {
                     let enemyTarget = 0; // resets target
                     switch (buildingData[9][i]) {
                         case 0:
-                        case 1:
+                        case 2:
                             enemyTarget = findEnemy(i, 1); // first
                             break;
-                        case 4:
                         case 5:
+                        case 1:
+                        case 4:
                             enemyTarget = findEnemy(i, 2); // random
                             break;
-                        default:
+                        case 3:
                             enemyTarget = findEnemy(i, 0); // strong
                     }
                     if (enemyTarget !== false) { // makes sure that enemy target is not false
                         switch (buildingData[9][i]) {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 5:
+                            case 0: // canon
+                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 0); // draws projectiles
                                 data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
                                 console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
                                 break;
-                            case 3:
-                                data[1][enemyTarget] -= data[1][enemyTarget] / 100 * buildingData[7][i]; // takes hp of unit and divdes its hp 100 and multiplies it by damage then subtracts it
+                            case 1: // multi canon
+                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 1); // draws projectiles
+                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
                                 console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
                                 break;
-                            case 4:
-                                data[4][enemyTarget] *= buildingData[7][i] // slows based on level
+                            case 2: // huge canon
+                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 2); // draws projectiles
+                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
+                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                                break;
+                            case 5: // super laser
+                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 5); // draws projectiles
+                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
+                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                                break;
+                            case 3: // laser
+                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 3); // draws projectiles
+                                if (data[5][enemyTarget] === 75) { // if boss
+                                    data[1][enemyTarget] -= 100 // take 100 damage
+                                } else { // if not boss
+                                    data[1][enemyTarget] -= data[1][enemyTarget] / 100 * buildingData[7][i]; // takes hp of unit and divdes its hp 100 and multiplies it by damage then subtracts it
+                                }
+                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                                break;
+                            case 4: // frost laser
+                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 4); // draws projectiles
+                                data[4][enemyTarget] = data[4][enemyTarget] * buildingData[7][i] // slows based on level
                                 console.log(buildingData[0][i] + " slowed a unit by 10%!"); // logs damage
                                 break;
                         }
@@ -772,26 +833,31 @@ function clearMap() {
     ctx.fillRect(0, 200, 960, 80); // draws middle rectangle again
 }
 
+// end of round cash
+function endRoundCash() {
+    if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
+        money = money + 100 + round / 40 + (bankAmount * 20); // 100 + 50 * roundui + 10 * bankAmount
+    }
+}
+
 // calls position update, unit spawns, and attacks
 function refreshUI() {
-    if (updateUI === true) {
+    if (updateUI === true) { // debug tool
         round += 1; // increases round
-        clearMap();
-        drawBuilding();
-        attack();
-        spawnUnits();
-        clearData(true);
-        for (i = 0; i < data[0].length; i++) { // fail save for clearData
-            if (data[6][i] === false) {
-                updatePosition(i); // updates cube location
-                ctx.fillRect(data[2][i], data[3][i], data[5][i], data[5][i]); // draws cubes
-            }
+        clearMap(); // refreshes map and redraws path
+        drawBuilding(); // draws buildings
+        spawnUnits(); // spawns new units
+        updatePosition(); // moves units
+        attack(); // buildings attack and draws attack animations
+        clearData(true); // cleans array and awards money
+        endRoundCash(); // awards cash at the end of the round
+        refreshStatUI(); // refreshes stat ui
+        if (lives < 0) {
+            alert("Game Over! You got to round: " + Math.floor(round / 1000) + "! Refresh to Play Again!"); // end of game alert
+            updateUI = false; // stops updating game
+            lives = "Dead"; // sets lives to dead
+            refreshStatUI(); // updates stats at the very end
         }
-        if (Number.isInteger(money) === false) { money = 0 } // stops game from breaking if money does not become an integer
-        if (Number.isInteger(round / 1000) === true) { // gives extra cash every 100 secs
-            money = money + 100 + round / 40 + (bankAmount * 20); // 100 + 50 * roundui + 10 * bankAmount
-        }
-        refreshStatUI();
     }
 }
 
