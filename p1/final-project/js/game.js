@@ -95,8 +95,8 @@ const buildingSpawns = [
     [0, 0, 0, 0, 0, 0], // positionX
     [0, 0, 0, 0, 0, 0], // positionY
     [5, 7.5, 12.5, 5, 7.5, 12.5, ], // size (radius)
-    [50, 30, 70, 60, 20, 100], // range
-    [30, 30, 80, 5, 5, 200], // attackspeed
+    [50, 30, 150, 60, 20, 100], // range
+    [30, 30, 80, 5, 5, 300], // attackspeed
     [5, 5, 200, 1, 0.9, 50], // damage per shot
     [1, 3, 1, 1, 1, 10], // targets
     [0, 1, 2, 3, 4, 5] // special ability and id
@@ -189,18 +189,18 @@ function canonUpgrade() {
         if (i === 0) { // canon
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[5][i] += 10; // damage per hit
-            buildingSpawns[6][i] = Math.ceil(0.8 * buildingSpawns[6][i] - 0.7); // attack speed
+            buildingSpawns[6][i] -= Math.ceil(0.8 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingSpawns[7][i] += 5; // range
         } else if (i === 1) { // multi canon
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[5][i] += 5; // damage per hit
-            buildingSpawns[6][i] = Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
+            buildingSpawns[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingSpawns[7][i] += 5; // range
             buildingSpawns[8][i] += 1; // targets
         } else if (i === 2) { // huge canon
             buildingSpawns[1][i] += 1; // level
-            buildingSpawns[5][i] += 50; // damage per hit
-            buildingSpawns[6][i] = Math.ceil(0.95 * buildingSpawns[6][i] - 0.7); // attack speed
+            buildingSpawns[5][i] += 100; // damage per hit
+            buildingSpawns[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingSpawns[7][i] += 15; // range
         }
     }
@@ -208,18 +208,18 @@ function canonUpgrade() {
         if (buildingData[9][i] === 0) { // canon
             buildingData[1][i] += 1; // level
             buildingData[5][i] += 10; // damage per hit
-            buildingData[6][i] = Math.ceil(0.8 * buildingSpawns[6][i] - 0.7); // attack speed
+            buildingData[6][i] -= Math.ceil(0.8 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingData[7][i] += 5; // range
         } else if (buildingData[9][i] === 1) { // multi canon
             buildingData[1][i] += 1; // level
             buildingData[5][i] += 5; // damage per hit
-            buildingData[6][i] = Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
+            buildingData[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingData[7][i] += 5; // range
             buildingData[8][i] += 1; // targets
         } else if (buildingData[9][i] === 2) { // huge canon
             buildingData[1][i] += 1; // level
             buildingData[5][i] += 50; // damage per hit
-            buildingData[6][i] = Math.ceil(0.95 * buildingSpawns[6][i] - 0.7); // attack speed
+            buildingData[6][i] -= Math.ceil(0.9 * buildingSpawns[6][i] - 0.7); // attack speed
             buildingData[7][i] += 15; // range
         }
     }
@@ -230,11 +230,12 @@ function laserUpgrade() {
     for (i = 3; i < 6; i++) { // 3 iterations
         if (i === 3) { // laser
             buildingSpawns[1][i] += 1; // level
-            buildingSpawns[5][i] += 0.5; // % damage per hit
+            buildingSpawns[5][i] += 2; // % damage per hit
             buildingSpawns[7][i] += 5; // range
         } else if (i === 4) { // frost laser
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[7][i] += 10; // range
+            buildingSpawns[8][i] += 1; // targets
         } else if (i === 5) { // super laser
             buildingSpawns[1][i] += 1; // level
             buildingSpawns[5][i] += 10; // damage per hit
@@ -246,7 +247,7 @@ function laserUpgrade() {
     for (i = 3; i < buildingData[0].length; i++) { // iterates through lasers on field
         if (buildingData[9][i] === 3) { // laser
             buildingData[1][i] += 1; // level
-            buildingData[5][i] += 0.5; // % damage per hit
+            buildingData[5][i] += 2; // % damage per hit
             buildingData[7][i] += 5; // range
         } else if (buildingData[9][i] === 4) { // frost laser
             buildingData[1][i] += 1; // level
@@ -417,7 +418,7 @@ function purchase7() { // kill random
                 clearData(true); // clears data from array 
             }
         }
-        buttonCost7 = Math.floor(((round / 10000) + 1) * buttonCost7) // increases cost
+        buttonCost7 += (Math.floor(round / 1000) * 5); // increases cost
         console.log("Purchase 7 Success"); // logs success
         button7.innerHTML = "Kill Random! ($" + buttonCost7 + ")"; // updates ui
     } else {
@@ -436,7 +437,7 @@ function purchase8() { // slow all
         for (i = 0; i < data[0].length; i++) { // iterates through loop
             data[4][i] *= slowAmount; // slows speed of all units by slow amount
         }
-        buttonCost8 = Math.floor(((round / 10000) + 1) * buttonCost8); // increases cost
+        buttonCost8 += (Math.floor(round / 1000) * 5); // increases cost
         console.log("Purchase 8 Success"); // logs success
         button8.innerHTML = "Slow All! ($" + buttonCost8 + ")"; // updates ui
     } else {
@@ -744,11 +745,11 @@ function attack() {
                     let enemyTarget = 0; // resets target
                     switch (buildingData[9][i]) {
                         case 0:
-                        case 4:
                             enemyTarget = findEnemy(i, 1); // first
                             break;
                         case 5:
                         case 1:
+                        case 4:
                             enemyTarget = findEnemy(i, 2); // random
                             break;
                         case 3:
@@ -788,7 +789,7 @@ function attack() {
                                 break;
                             case 4: // frost laser
                                 drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 4); // draws projectiles
-                                data[4][enemyTarget] = data[4][enemyTarget] * buildingData[7][i] // slows based on level
+                                data[4][enemyTarget] = 0.02 // slows based on level
                                 console.log(buildingData[0][i] + " slowed a unit by 10%!"); // logs damage
                                 break;
                         }
