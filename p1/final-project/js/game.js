@@ -6,7 +6,6 @@ let ctx = map.getContext("2d");
 let money = 800;
 let lives = 200;
 let round = 1000;
-let gameSpeed = 500;
 
 // button id pull
 let button1 = document.getElementById("button1");
