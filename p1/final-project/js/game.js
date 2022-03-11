@@ -3,7 +3,7 @@ let map = document.getElementById("map");
 let ctx = map.getContext("2d");
 
 // variables
-let money = 500;
+let money = 800;
 let lives = 200;
 let round = 1000;
 let gameSpeed = 500;
