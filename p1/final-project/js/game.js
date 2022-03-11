@@ -6,6 +6,7 @@ let ctx = map.getContext("2d");
 let money = 500;
 let lives = 200;
 let round = 1000;
+let gameSpeed = 500;
 
 // button id pull
 let button1 = document.getElementById("button1");
@@ -32,6 +33,8 @@ let button21 = document.getElementById("button21");
 let button22 = document.getElementById("button22");
 let button23 = document.getElementById("button23");
 let button24 = document.getElementById("button24");
+
+let changeSpeedButton = document.getElementById("changespeedbutton")
 
 // button cost set
 let buttonCost1 = 0;
@@ -122,15 +125,15 @@ const buildingSpawns = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionX
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionY
     [5, 7.5, 12.5, 5, 7.5, 12.5, 10, 15, 5, 7.5, 12.5, 15, 0, 0, 0, 0, 4.8], // size (radius)
-    [50, 30, 100, 60, 20, 100, 50, 400, 400, 30, 20, 20, 0, 0, 0, 0, 30], // range
-    [30, 30, 80, 1, 200, 5, 600, 600, 120, 50, 20, 20, 0, 0, 0, 0, 5], // attackspeed
-    [5, 5, 250, 3, 0.9, 0.5, 100, 50, 0, 0, 0, 0, 0, 0, 0, 0, 1], // damage per shot
-    [1, 3, 1, 1, 1, 10, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1], // targets
+    [50, 30, 100, 60, 50, 100, 50, 400, 400, 30, 20, 20, 0, 0, 0, 0, 50], // range
+    [30, 30, 80, 5, 5, 200, 600, 600, 120, 50, 20, 20, 0, 0, 0, 0, 5], // attackspeed
+    [5, 7.5, 250, 5, 0.9, 100, 100, 50, 0, 0, 0, 0, 0, 0, 0, 0, 2], // damage per shot
+    [1, 3, 1, 1, 1, 5, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1], // targets
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 6.1], // special ability and id
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // buffs
 ];
 
-
+const showLaser = []; // filler array
 
 //// debug ////
 
@@ -161,6 +164,8 @@ function showArrays() { // prints arrays
     console.log(buildingData);
     console.log("building spawn array:");
     console.log(buildingSpawns);
+    console.log("laser array:");
+    console.log(showLaser);
 }
 
 function showStats() { // shows basic stats
@@ -194,11 +199,16 @@ function positionBuildingTest(positionTestX, positionTestY, size) {
 }
 
 // takes range and size of to generate position to place then checks for collision
-function buildingPlacement(range, size) {
+function buildingPlacement(range, size, buildingType) {
     if (size > 200) { size = 200 } // sets size to 200 if over 200 to avoid off screen circles
     for (j = 0; j < 100; j++) { // tries to place building 100 times
-        let positionTestX = Math.floor(Math.random() * 960) + 1; // finds x value between 0 and 960
-        let positionTestY = Math.floor(Math.random() * (80 + (range - 10) * 2)) + 1; // returns number 1 - (80 + 2(range - 10))
+        let positionTestX = 0; // defines position test x
+        if (buildingType === 6) {
+            positionTestX = Math.ceil(Math.random() * 160) + 800; // if spawns on back side
+        } else {
+            positionTestX = Math.ceil(Math.random() * 960); // finds x value between 0 and 960
+        }
+        let positionTestY = Math.ceil(Math.random() * (80 + (range - 10) * 2)); // returns number 1 - (80 + 2(range - 10))
         positionTestY += (210 - range) // adds 200 - range to make sure that building is in range of track
             // following line tests current buildings against new one being placed and makes sure Y is not in track
         if (positionTestY < 480 && positionTestY > 0 && positionBuildingTest(positionTestX, positionTestY, size) === true && (positionTestY < (200 - size) || positionTestY > (280 + size))) {
@@ -217,14 +227,15 @@ function canonUpgrade() {
     buildingSpawns[6][0] -= 3; // attack speed
     if (buildingSpawns[6][0] < 5) { buildingSpawns[6][i] = 5 } // sets attackspeed to laser speed if too low
     buildingSpawns[5][0] += 10; // range
-    buildingSpawns[7][1] += 5; // damage per hit
-    buildingSpawns[5][1] += 5; // range
+    buildingSpawns[7][1] += 7.5; // damage per hit
+    buildingSpawns[5][1] += 7.5; // range
     buildingSpawns[8][1] += 1; // targets
     buildingSpawns[7][2] += 150; // damage per hit
     buildingSpawns[5][2] += 20; // range
     buildingSpawns[7][6] += (Math.floor(50 * ((1 + canonLevel)) / 2)) // damage on spawned units
+    buildingSpawns[5][6] += 10; // range
     buildingSpawns[7][16] += (canonLevel); // on hit damage of car
-    buildingSpawns[5][16] += 5; // range of car
+    buildingSpawns[5][16] += 7.5; // range of car
     for (i = 0; i < buildingData[0].length; i++) { // iterates through canons on field
         if (buildingData[9][i] === 0) { // canon
             buildingData[7][i] += 10; // damage per hit
@@ -232,39 +243,42 @@ function canonUpgrade() {
             if (buildingData[6][i] < 5) { buildingData[6][i] = 5 } // sets attackspeed to laser speed if too low
             buildingData[5][i] += 10; // range
         } else if (buildingData[9][i] === 1) { // multi canon
-            buildingData[7][i] += 5; // damage per hit
-            buildingData[5][i] += 5; // range
+            buildingData[7][i] += 7.5; // damage per hit
+            buildingData[5][i] += 7.5; // range
             buildingData[8][i] += 1; // targets
         } else if (buildingData[9][i] === 2) { // huge canon
             buildingData[7][i] += 150; // damage per hit
             buildingData[5][i] += 20; // range
         } else if (buildingData[9][i] === 6) { // moving canon
             buildingData[7][i] += (Math.floor(50 * ((1 + canonLevel))) / 2) // damage on spawned units
+            buildingData[5][i] += 10; // range
         } else if (buildingData[9][i] === 16) { // moving car
             buildingData[7][i] += (canonLevel); // on hit damage of car
-            buildingData[5][i] += 5; // range of car
+            buildingData[5][i] += 7.5; // range of car
         }
     }
 }
 
 // upgrades laser in data and in spawn arrays
 function laserUpgrade() {
-    buildingSpawns[7][3] += 3; // % damage per hit
+    buildingSpawns[7][3] += 5; // % damage per hit
     buildingSpawns[5][3] += 5; // range
-    buildingSpawns[5][4] += 5; // range
-    buildingSpawns[8][4] += 1; // targets
-    buildingSpawns[7][6] += (laserLevel / 2); // damage per hit
+    if (buildingSpawns[7][4] > 0.2) { buildingSpawns[7][4] -= 0.05 }; // slow amount
+    buildingSpawns[5][4] += 10; // range
+    buildingSpawns[7][5] += 20; // damage per hit
     buildingSpawns[5][5] += 20; // range
+    buildingSpawns[8][5] += 1; // targets
     for (i = 0; i < buildingData[0].length; i++) { // iterates through lasers on field
         if (buildingData[9][i] === 3) { // laser
-            buildingData[7][i] += 3; // % damage per hit
+            buildingData[7][i] += 5; // % damage per hit
             buildingData[5][i] += 5; // range
         } else if (buildingData[9][i] === 4) { // frost laser
-            buildingData[5][i] += 5; // range
-            buildingData[8][i] += 1; // targets
+            buildingData[5][i] += 10; // range
+            if (buildingData[7][i] > 0.2) { buildingData[7][i] -= 0.05 }; // slow amount
         } else if (buildingData[9][i] === 5) { // super laser
-            buildingData[7][i] += (laserLevel / 2); // damage per hit
+            buildingData[7][i] += 20 // damage per hit
             buildingData[5][i] += 20; // range
+            buildingData[8][i] += 1; // targets
         }
     }
 }
@@ -279,7 +293,7 @@ function purchase1() { // canon
     let buildingType = 0; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost1 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost1 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost1; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -302,7 +316,7 @@ function purchase2() { // multi canon
     let buildingType = 1; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost2 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost2 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost2; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -325,7 +339,7 @@ function purchase3() { // huge canon
     let buildingType = 2; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost3 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost3 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost3; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -348,7 +362,7 @@ function purchase4() { // laser
     let buildingType = 3; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost4 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost4 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost4; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -371,7 +385,7 @@ function purchase5() { // frost laser
     let buildingType = 4; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost5 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost5 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost5; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -394,7 +408,7 @@ function purchase6() { // super laser
     let buildingType = 5; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost6 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost6 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost6; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -407,7 +421,7 @@ function purchase6() { // super laser
         }
         buttonCost6 += 3000; // increases cost
         console.log("Purchase 6 Success"); // logs success
-        button6.innerHTML = "Buy Super Laser! ($" + buttonCost6 + ")"; // updates ui
+        button6.innerHTML = "Buy Chain Laser! ($" + buttonCost6 + ")"; // updates ui
     } else {
         console.log("Purchase 6 Fail"); // logs fail
     }
@@ -505,7 +519,7 @@ function purchase13() { // moving canon
     let buildingType = 6; // what building you are spawning
     xPush = 0; // refresh x push value
     yPush = 0; // refresh y push value
-    if (money >= buttonCost13 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType]) === true) { // Check Money and Collision
+    if (money >= buttonCost13 && buildingPlacement(buildingSpawns[5][buildingType], buildingSpawns[4][buildingType], buildingType) === true) { // Check Money and Collision
         money -= buttonCost13; // taxes money
         for (i = 0; i < buildingSpawns.length; i++) { // loops through array to push to data
             if (i === 2) { // checks if i is push x cords
@@ -541,7 +555,7 @@ function purchase14() {
         }
         buttonCost14 += 5000; // increases cost
         console.log("Purchase 14 Success"); // logs success
-        button13.innerHTML = "Buy Death Laser! ($" + buttonCost14 + ")"; // updates ui
+        button13.innerHTML = "Buy Pierce Laser! ($" + buttonCost14 + ")"; // updates ui
     } else {
         console.log("Purchase 14 Fail"); // logs fail
     }
@@ -714,12 +728,13 @@ function drawProjectiles(towerX, towerY, enemyX, enmeyY, towerShot) {
             break;
         case 4: // frost laser
             ctx.strokeStyle = "#6ac5fe"; // color
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 2;
             break;
         case 5: // super laser
             ctx.strokeStyle = "#3792cb"; // color
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 5;
             break;
+        case 6:
         case 6.1: // moving canon
             ctx.strokeStyle = "#ff3636"; // color
             ctx.lineWidth = 2.5;
@@ -754,12 +769,15 @@ function findEnemy(positionDerive, mode) {
             }
         }
     } else if (mode === 1) { // if target first
-        for (m = 0; m < data[0].length; m++) { // loops through array
-            let circle2X = data[2][m] + (data[5][m] / 2); // finds center of x of cube
-            let circle2Y = data[3][m] + (data[5][m] / 2); // finds center of y of cube
-            let circle2Radi = data[5][m] / 2 // find radi
-            if (collisionAttackCheck(positionXAttack, positionYAttack, rangeAttack, circle2X, circle2Y, circle2Radi) === true) { // finds units ordering from oldest to newist
-                return m; // returns target
+        const firstArray = data[2].slice().sort((a, b) => a - b); // creates copy of x position array
+        for (m = firstArray.length - 1; m >= 0; m--) { // loops through copy of array from back to front
+            let indexTarget = data[2].indexOf(firstArray[m]); // sets index target to cube closest to exit
+            let circle2X = data[2][indexTarget] + (data[5][indexTarget] / 2); // finds center of x of cube
+            let circle2Y = data[3][indexTarget] + (data[5][indexTarget] / 2); // finds center of y of cube
+            let circle2Radi = data[5][indexTarget] / 2 // find radi
+            if (collisionAttackCheck(positionXAttack, positionYAttack, rangeAttack, circle2X, circle2Y, circle2Radi) === true && antiRepeat > m) { // finds units ordering from oldest to newist
+                antiRepeat = m; // makes sure antiRepeat does target the same unit
+                return indexTarget; // returns target
             }
         }
         return false; // returns false if no target found
@@ -779,16 +797,22 @@ function findEnemy(positionDerive, mode) {
 }
 
 // spawns car
-function spawnCar() {
-    for (j = 0; j < buildingSpawns.length; j++) {
+function spawnCar(i) {
+    let pushXPosition = 0 // define variables
+    let pushYPosition = 0 // define variables
+    for (j = 0; j < buildingSpawns.length; j++) { // iterates through amount of stats buildings have
         if (j === 2) { // if x position
-            buildingData[j].push(1100) // sets building to x
+            pushXPosition = (Math.ceil(Math.random() * 60) + 900); // skews building x
+            buildingData[j].push(pushXPosition); // stores x push data
         } else if (j === 3) {
-            buildingData[j].push(Math.ceil(Math.random() * 70) + 205) // skews y
+            pushYPosition = (Math.ceil(Math.random() * 70) + 205) // skews y
+            buildingData[j].push(pushYPosition); // stores y push data
         } else {
             buildingData[j].push(buildingSpawns[j][16]); // pushes car onto field
         }
     }
+    showLaser.push([buildingData[2][i], buildingData[3][i], pushXPosition, pushYPosition, 6, 5]); // draws projectile
+
 }
 
 // math behind circle square collision
@@ -806,7 +830,7 @@ function circleSquareCollision(circle, rect) {
 
 // moves car and checks for collision
 function carCollision(i) {
-    buildingData[2][i] -= 0.8; // updates xPosition
+    buildingData[2][i] -= 1.6; // updates xPosition
     let circle = { x: buildingData[2][i], y: buildingData[3][i], r: buildingData[4][i] }; // circle object define
     for (j = 0; j < data[0].length; j++) { // iterates through enemy
         let rect = { x: data[2][j], y: data[3][j], w: data[5][j], h: data[5][j] }; // defines rectangle test
@@ -817,6 +841,8 @@ function carCollision(i) {
     }
     return false;
 }
+
+let antiRepeat = 0; // variable for attack function
 
 // calculate tower attacks
 function attack() {
@@ -830,72 +856,90 @@ function attack() {
                 }
             }
             if (Number.isInteger(round / buildingData[6][i]) === true) { // attackspeed
-                for (n = 0; n < buildingData[8][i]; n++) { // loops through attack depending on target
-                    let enemyTarget = 0; // resets target
-                    switch (buildingData[9][i]) {
-                        case 0:
-                        case 6.1:
-                            enemyTarget = findEnemy(i, 1); // first
-                            break;
-                        case 5:
-                        case 1:
-                        case 4:
-                            enemyTarget = findEnemy(i, 2); // random
-                            break;
-                        case 3:
-                        case 2: // 
-                            enemyTarget = findEnemy(i, 0); // strong
-                            break;
-                        case 6: // canon maker
-                            spawnCar(); // spawns car
-                            console.log(buildingData[0][i] + " spawned " + buildingData[0][buildingData[0].length - 1]); // logs spawn message
-                    }
-                    if (enemyTarget !== false) { // makes sure that enemy target is not false
-                        switch (buildingData[9][i]) {
-                            case 0: // canon
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 0); // draws projectiles
-                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
-                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
-                                break;
-                            case 1: // multi canon
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 1); // draws projectiles
-                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
-                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
-                                break;
-                            case 2: // huge canon
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 2); // draws projectiles
-                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
-                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
-                                break;
-                            case 5: // super laser
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 5); // draws projectiles
-                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
-                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
-                                break;
-                            case 3: // laser
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 3); // draws projectiles
-                                if (data[5][enemyTarget] === 75) { // if boss
-                                    data[1][enemyTarget] -= 100 // take 100 damage
-                                    console.log(buildingData[0][i] + " dealt 100 damage!")
-                                } else { // if not boss
-                                    data[1][enemyTarget] -= Math.ceil((data[1][enemyTarget] / 100) * buildingData[7][i]); // takes hp of unit and divdes its hp 100 and multiplies it by damage then subtracts it
-                                    console.log(buildingData[0][i] + " dealt " + Math.ceil((data[1][enemyTarget] / 100) * buildingData[7][i]) + " damage!"); // logs damage
-
-                                }
-                                break;
-                            case 4: // frost laser
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 4); // draws projectiles
-                                data[4][enemyTarget] = 0.02 // slows based on level
-                                console.log(buildingData[0][i] + " slowed a unit by 10%!"); // logs damage
-                                break;
-                            case 6.1: // moving canon factory
-                                drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 6.1); // draws projectiles
-                                data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
-                                console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
-                                break;
+                const superLaserTargets = []; // super laser target order
+                let enemyTarget = 0; // resets target
+                antiRepeat = 1000000; // stops repeats
+                switch (buildingData[9][i]) {
+                    case 0:
+                    case 6.1:
+                    case 4:
+                    case 3:
+                    case 2:
+                        enemyTarget = findEnemy(i, 1); // first
+                        break;
+                    case 1:
+                    case 5:
+                        for (j = 0; j < (buildingData[8][i]); j++) { // takes targets of superlaser
+                            superLaserTargets.push(findEnemy(i, 1)); // pushes order of pushes onto target
                         }
+                        break;
+                    case 100:
+                        enemyTarget = findEnemy(i, 2); // random
+                        break;
+                    case 100:
+                        enemyTarget = findEnemy(i, 0); // strong
+                        break;
+                    case 6: // canon maker
+                        spawnCar(i); // spawns car
+                        console.log(buildingData[0][i] + " spawned " + buildingData[0][buildingData[0].length - 1]); // logs spawn message
+                }
+                if (enemyTarget !== false) { // makes sure that enemy target is not false
+                    switch (buildingData[9][i]) {
+                        case 0: // canon
+                            drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 0); // draws projectiles
+                            data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
+                            console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                            break;
+                        case 1: // multi canon
+                            for (j = 0; j < superLaserTargets.length; j++) {
+                                if (superLaserTargets[j] !== false) {
+                                    data[1][superLaserTargets[j]] -= buildingData[7][i] // takes damage per shot and subtracts from hp
+                                    console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                                    drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][superLaserTargets[j]]) + (data[5][superLaserTargets[j]] / 2), (data[3][superLaserTargets[j]]) + (data[5][superLaserTargets[j]] / 2), 1); // draws projectiles
+                                }
+                            }
+                            break;
+                        case 2: // huge canon
+                            drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 2); // draws projectiles
+                            data[2][enemyTarget] -= (5 + canonLevel) // knocks back 100 squares minus size
+                            data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
+                            console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                            break;
+                        case 5: // super laser
+                            showLaser.push([buildingData[2][i], buildingData[3][i], (data[2][superLaserTargets[0]]) + (data[5][superLaserTargets[0]] / 2), (data[3][superLaserTargets[0]]) + (data[5][superLaserTargets[0]] / 2), 5, 5]); // draws projectiles
+                            for (j = 0; j < superLaserTargets.length; j++) {
+                                if (superLaserTargets[j] !== false) {
+                                    data[1][superLaserTargets[j]] -= buildingData[7][i] // takes damage per shot and subtracts from hp
+                                    console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                                    if (j !== 0) {
+                                        showLaser.push([(data[2][superLaserTargets[j - 1]]) + (data[5][superLaserTargets[j - 1]] / 2), (data[3][superLaserTargets[j - 1]]) + (data[5][superLaserTargets[j - 1]] / 2), (data[2][superLaserTargets[j]]) + (data[5][superLaserTargets[j]] / 2), (data[3][superLaserTargets[j]]) + (data[5][superLaserTargets[j]] / 2), 5, 5]); // draws projectiles
+                                    }
+                                }
+                            }
+                            break;
+                        case 3: // laser
+                            showLaser.push([buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 3, 5]); // draws projectiles
+                            if (data[5][enemyTarget] === 75) { // if boss
+                                data[1][enemyTarget] -= 50 + (20 * laserLevel) // take 100 damage
+                                console.log(buildingData[0][i] + " dealt 100 damage!")
+                            } else { // if not boss
+                                data[1][enemyTarget] -= Math.ceil((data[1][enemyTarget] / 100) * buildingData[7][i]); // takes hp of unit and divdes its hp 100 and multiplies it by damage then subtracts it
+                                console.log(buildingData[0][i] + " dealt " + Math.ceil((data[1][enemyTarget] / 100) * buildingData[7][i]) + " damage!"); // logs damage
+                            }
+                            break;
+                        case 4: // frost laser
+                            showLaser.push([buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 4, 5]); // draws projectiles
+                            data[4][enemyTarget] = (spawns[4][data[7][enemyTarget]] * buildingData[7][i]) // slows based on level
+                            console.log(buildingData[0][i] + " reduced the speed of to " + buildingSpawns[7][4] + " times!"); // logs damage
+                            break;
+                        case 6.1: // moving canon factory
+                            drawProjectiles(buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 6.1); // draws projectiles
+                            data[1][enemyTarget] -= buildingData[7][i]; // takes damage per shot and subtracts from hp
+                            console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
+                            break;
                     }
                 }
+
             }
         }
     }
@@ -942,6 +986,17 @@ function endRoundCash() {
     }
 }
 
+function showLaserArray() {
+    for (i = showLaser.length - 1; i >= 0; i--) {
+        drawProjectiles(showLaser[i][0], showLaser[i][1], showLaser[i][2], showLaser[i][3], showLaser[i][4]); // prints laser projectiles
+        if (showLaser[i][5] < 1) {
+            showLaser.splice(i, 1)
+        } else {
+            showLaser[i][5] -= 1; // reduces attackspeed count
+        }
+    }
+}
+
 // calls position update, unit spawns, and attacks
 function refreshUI() {
     if (updateUI === true) { // debug tool
@@ -950,7 +1005,8 @@ function refreshUI() {
         drawBuilding(); // draws buildings
         spawnUnits(); // spawns new units
         updatePosition(); // moves units
-        attack(); // buildings attack and draws attack animations
+        attack(); // buildings attack and draws attack animation
+        showLaserArray();
         clearData(true); // cleans array and awards money
         endRoundCash(); // awards cash at the end of the round
         refreshStatUI(); // refreshes stat ui
@@ -966,5 +1022,5 @@ function refreshUI() {
     }
 }
 
-// calls update every 3/10 second
-setInterval(refreshUI, 30);
+
+setInterval(refreshUI, 20); // 1/50 of a second spawns
