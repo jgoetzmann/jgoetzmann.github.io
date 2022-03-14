@@ -117,14 +117,14 @@ const buildingData = [
 ];
 
 const buildingSpawns = [
-    ["cannon", "multi cannon", "huge cannon", "laser", "frost laser", "chain laser", "cannon factory", "pierce laser", "scatter cannon", "missile", "scatter missile", "toxic missle", "shock missle", "legend 1", "legend 2", "legend 3", "legend 4", "car canon", "pellet"], // name
+    ["cannon", "multi cannon", "huge cannon", "laser", "frost laser", "chain laser", "cannon factory", "pierce laser", "scatter cannon", "missile", "scatter missile", "toxic missle", "shock missle", "legend 1", "legend 2", "legend 3", "legend 4", "moving cannon", "pellet"], // name
     [1, 1, 1, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1], // properties
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionX
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionY
     [5, 7.5, 12.5, 5, 7.5, 12.5, 10, 12.5, 7.5, 0, 0, 0, 0, 0, 0, 0, 0, 4.8, 2.5], // size (radius)
     [50, 30, 100, 60, 50, 100, 50, 100, 80, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0], // range
     [30, 30, 120, 5, 5, 200, 600, 80, 200, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0], // attackspeed
-    [5, 7.5, 250, 5, 0.9, 100, 100, 16, 50, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50], // damage per shot
+    [5, 7.5, 250, 5, 0.9, 100, 100, 125, 50, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50], // damage per shot
     [1, 3, 1, 1, 1, 5, 1, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], // targets
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 6.1, 8.1], // special ability and id
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // buffs
@@ -210,10 +210,7 @@ function buildingPlacement(range, size, buildingType) {
 
         }
         positionTestY += (210 - range) // adds 200 - range to make sure that building is in range of track
-        if (buildingType === 7 && positionTestY > 280) { // if placement is on top half
-            positionTestY = 240; // force retry placement
-        }
-        // following line tests current buildings against new one being placed and makes sure Y is not in track
+            // following line tests current buildings against new one being placed and makes sure Y is not in track
         if (positionTestY < 480 && positionTestY > 0 && positionBuildingTest(positionTestX, positionTestY, size) === true && (positionTestY < (200 - size) || positionTestY > (280 + size))) {
             xPush = positionTestX;
             yPush = positionTestY;
@@ -241,6 +238,7 @@ function canonUpgrade() {
     buildingSpawns[5][17] += 7.5; // range of car
     buildingSpawns[7][8] += 25; // dph
     buildingSpawns[8][8] += 1; // targets
+    buildingSpawns[7][18] += 25; // dph
     for (i = 0; i < buildingData[0].length; i++) { // iterates through canons on field
         if (buildingData[9][i] === 0) { // canon
             buildingData[7][i] += 10; // damage per hit
@@ -651,7 +649,7 @@ function spawnUnits() {
         switch (spawnChoice) { // calls position offset based on what type of cube it is
             case 11: // boss
                 spawns[3][spawnChoice] = positionOffset(5);
-                spawns[1][11] = Math.floor(1.05 * spawns[1][11]); // scales boss hp
+                spawns[1][11] += (500); // scales boss hp
                 break;
             case 10: // huge
                 spawns[3][spawnChoice] = positionOffset(30);
@@ -880,6 +878,7 @@ function carCollision(i) {
         let rect = { x: data[2][j], y: data[3][j], w: data[5][j], h: data[5][j] }; // defines rectangle test
         if (circleSquareCollision(circle, rect) === true) { // if collision detected
             data[1][j] -= buildingSpawns[7][6]; // removes hp from cube
+            console.log(buildingData[0][i] + " crashed and dealt " + buildingSpawns[7][6] + " damage!")
             return true; // if collision removes hp from building
         }
     }
@@ -994,8 +993,16 @@ function attack() {
                         break;
                     case 7:
                         for (j = 0; j < data[0].length; j++) { // iterates through unit loop
-                            if (squareSquareCollision((buildingData[2][i] - 1), buildingData[3][i], 9.5, buildingData[5][i], data[2][j], data[3][j], data[5][j], data[5][j]) === true) {
-                                superLaserTargets.push(j); // if collision is there pushed unit id
+                            if (buildingData[3][i] < 280) { // if top side
+                                if (squareSquareCollision((buildingData[2][i] - 7.5), buildingData[3][i], 15, buildingData[5][i], data[2][j], data[3][j], data[5][j], data[5][j]) === true) {
+                                    console.log(j)
+                                    superLaserTargets.push(j); // if collision is there pushed unit id
+                                }
+                            } else {
+                                if (squareSquareCollision((buildingData[2][i] - 7.5), (buildingData[3][i] - buildingData[5][i]), 15, buildingData[5][i], data[2][j], data[3][j], data[5][j], data[5][j]) === true) {
+                                    console.log(j)
+                                    superLaserTargets.push(j); // if collision is there pushed unit id
+                                }
                             }
                         }
                         break;
@@ -1076,9 +1083,18 @@ function attack() {
                             console.log(buildingData[0][i] + " dealt " + buildingData[7][i] + " damage!"); // logs damage
                             break;
                         case 7: // pierce laser
-                            let furthestDraw = buildingData[3][i] + buildingData[5][i]; // defines furthest draw
-                            if (furthestDraw > 280) { // if exceeds track length
-                                furthestDraw = 280; // sets to end of track
+                            let furthestDraw = 0; // defines variables
+                            if (buildingData[3][i] < 280) { // if top
+                                furthestDraw = buildingData[3][i] + buildingData[5][i]; // defines furthest draw
+                                if (furthestDraw > 280) { // if exceeds track length
+                                    furthestDraw = 280; // sets to end of track
+                                }
+                            }
+                            if (buildingData[3][i] > 200) { // if bot
+                                furthestDraw = buildingData[3][i] - buildingData[5][i]; // defines furthest draw
+                                if (furthestDraw < 200) { // if exceeds track length
+                                    furthestDraw = 200; // sets to end of track
+                                }
                             }
                             showLaser.push([buildingData[2][i], buildingData[3][i], buildingData[2][i], furthestDraw, 7, 8]); // draws projectiles
                             if (superLaserTargets.length > 0) { // makes sure that there is units in array
