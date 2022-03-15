@@ -37,7 +37,7 @@ let button24 = document.getElementById("button24");
 let buttonCost1 = 0;
 let buttonCost2 = 300;
 let buttonCost3 = 1200;
-let buttonCost4 = 650;
+let buttonCost4 = 675;
 let buttonCost5 = 1250;
 let buttonCost6 = 2400;
 let buttonCost7 = 50;
@@ -123,8 +123,8 @@ const buildingSpawns = [
     [1, 1, 1, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0], // properties
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionX
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // positionY
-    [5, 7.5, 12.5, 5, 7.5, 12.5, 10, 12.5, 7.5, 0, 0, 0, 0, 0, 0, 0, 0, 4.8, 2.5, 6.25], // size (radius)
-    [50, 30, 100, 60, 50, 100, 50, 100, 80, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 160], // range
+    [5, 7.5, 12.5, 5, 7.5, 12.5, 10, 12.5, 7.5, 0, 0, 0, 0, 0, 0, 0, 0, 4.8, 2.5, 5], // size (radius)
+    [50, 30, 100, 60, 50, 100, 50, 100, 80, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 170], // range
     [30, 30, 120, 5, 5, 200, 600, 80, 200, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 250], // attackspeed
     [5, 7.5, 250, 5, 0.9, 100, 100, 125, 50, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50, 0], // damage per shot
     [1, 3, 1, 1, 1, 5, 1, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], // targets
@@ -209,7 +209,9 @@ function buildingPlacement(range, size, buildingType) {
         } else {
             positionTestX = Math.ceil(Math.random() * 960); // finds x value between 0 and 960
             positionTestY = Math.ceil(Math.random() * (80 + (range - 10) * 2)); // returns number 1 - (80 + 2(range - 10))
-
+        }
+        if (buildingType === 19 && ((positionTestY > 150 && positionTestY < 280) || (positionTestY < 330 && positionTestY > 200))) { // if bank
+            positionTestY = 0; // forces reset
         }
         positionTestY += (210 - range) // adds 200 - range to make sure that building is in range of track
             // following line tests current buildings against new one being placed and makes sure Y is not in track
@@ -921,8 +923,10 @@ function carCollision(i) {
     for (j = 0; j < data[0].length; j++) { // iterates through enemy
         let rect = { x: data[2][j], y: data[3][j], w: data[5][j], h: data[5][j] }; // defines rectangle test
         if (circleSquareCollision(circle, rect) === true) { // if collision detected
-            data[1][j] -= buildingSpawns[7][6]; // removes hp from cube
-            console.log(buildingData[0][i] + " crashed and dealt " + buildingSpawns[7][6] + " damage!")
+            if (data[8][j] !== buildingData[1][i]) {
+                data[1][j] -= buildingSpawns[7][6]; // removes hp from cube
+                console.log(buildingData[0][i] + " crashed and dealt " + buildingSpawns[7][6] + " damage!")
+            }
             return true; // if collision removes hp from building
         }
     }
@@ -953,12 +957,16 @@ function pelletCollision(i) {
         if (circleSquareCollision(circle, rect) === true) { // if collision detected
             if (buildingData[8][i] === 0) { // of pellet botside
                 let subtractAmount = (Math.ceil(buildingData[7][i] * ((300 - buildingData[3][i]) / 100))); // removes hp from cube
-                data[1][j] -= subtractAmount;
-                console.log(buildingData[0][i] + " dealt " + subtractAmount + " damage!"); // display damage
+                if (data[8][j] !== buildingData[1][i]) {
+                    data[1][j] -= subtractAmount;
+                    console.log(buildingData[0][i] + " dealt " + subtractAmount + " damage!"); // display damage
+                }
             } else { // if botside
                 let subtractAmount = (Math.ceil(buildingData[7][i] * ((buildingData[3][i] - 180) / 100))); // removes hp from cube
-                data[1][j] -= subtractAmount;
-                console.log(buildingData[0][i] + " dealt " + subtractAmount + " damage!"); // display damage
+                if (data[8][j] !== buildingData[1][i]) {
+                    data[1][j] -= subtractAmount;
+                    console.log(buildingData[0][i] + " dealt " + subtractAmount + " damage!"); // display damage
+                }
             }
             return true; // if collision removes hp from building
         }
@@ -1113,9 +1121,9 @@ function attack() {
                             break;
                         case 3: // laser
                             showLaser.push([buildingData[2][i], buildingData[3][i], (data[2][enemyTarget]) + (data[5][enemyTarget] / 2), (data[3][enemyTarget]) + (data[5][enemyTarget] / 2), 3, 5]); // draws projectiles
-                            if (data[5][enemyTarget] === 75) { // if boss
+                            if (data[7][enemyTarget] === 11) { // if boss
                                 data[1][enemyTarget] -= 50 + (20 * laserLevel) // take 100 damage
-                                console.log(buildingData[0][i] + " dealt " + 50 + (20 * laserLevel) + " damage!")
+                                console.log(buildingData[0][i] + " dealt " + (50 + (20 * laserLevel)) + " damage!")
                             } else { // if not boss
                                 data[1][enemyTarget] -= Math.ceil((data[1][enemyTarget] / 100) * buildingData[7][i]); // takes hp of unit and divdes its hp 100 and multiplies it by damage then subtracts it
                                 console.log(buildingData[0][i] + " dealt " + Math.ceil((data[1][enemyTarget] / 100) * buildingData[7][i]) + " damage!"); // logs damage
