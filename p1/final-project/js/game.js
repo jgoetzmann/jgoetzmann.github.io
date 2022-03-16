@@ -126,7 +126,7 @@ const buildingSpawns = [
     [5, 7.5, 12.5, 5, 7.5, 12.5, 10, 12.5, 7.5, 0, 0, 0, 0, 0, 0, 0, 0, 4.8, 2.5, 5], // size (radius)
     [50, 30, 100, 60, 50, 100, 50, 100, 80, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 170], // range
     [30, 30, 120, 5, 5, 200, 600, 80, 200, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 250], // attackspeed
-    [5, 7.5, 250, 5, 0.9, 100, 100, 125, 50, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50, 0], // damage per shot
+    [5, 7.5, 250, 5, 0.9, 100, 100, 125, 35, 0, 0, 0, 0, 0, 0, 0, 0, 2, 35, 0], // damage per shot
     [1, 3, 1, 1, 1, 5, 1, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], // targets
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 6.1, 8.1, 19], // special ability and id
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // buffs
@@ -1218,7 +1218,7 @@ function endRoundCash() {
     if (Number.isInteger(round / 1000) === true) { // gives extra cash every 20 secs
         endOfRoundMoney = (90 + (round / 100)); // 90 + 10 per round
         money += endOfRoundMoney; // adds money 
-        showMoneyArray.push([endOfRoundMoney, 160, 42, 50]); // draws money
+        showMoneyArray.push([endOfRoundMoney, 190, 42, 50]); // draws money
     }
 }
 
