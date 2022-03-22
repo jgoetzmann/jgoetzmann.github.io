@@ -33,6 +33,15 @@ let button22 = document.getElementById("button22");
 let button23 = document.getElementById("button23");
 let button24 = document.getElementById("button24");
 
+// play with upgrade menu
+function openForm() {
+    document.getElementById("myForm").style.display = "block";
+}
+
+function closeForm() {
+    document.getElementById("myForm").style.display = "none";
+}
+
 // button cost set
 let buttonCost1 = 0;
 let buttonCost2 = 300;
