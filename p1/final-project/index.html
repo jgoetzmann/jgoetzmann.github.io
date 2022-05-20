@@ -61,7 +61,7 @@
 
 <body style="background-color: #323639; zoom: 90%;">
     <canvas id="map" width="960px" height="480px" style="border: 1px solid #000000;background-color: #6b6b6b;"></canvas>
-    <button class="open-button" onclick="openForm()">Open Form</button>
+    <button style="display: none;" class="open-button" onclick="openForm()">Open Form</button>
 
     <div style="position:absolute; top: 500px; left: 10px;">
         <button id="button1" type="button" onclick="purchase1()" class="big">Buy Cannon! (Free)</button>
@@ -84,16 +84,16 @@
         <button id="button12" type="button" onclick="purchase12()" class="big">Upgrade Utility! ($2500)</button>
     </div>
     <div class="form-popup" id="myForm">
-        <form action="/action_page.php" class="form-container">
+        <form action="/action_page.php" style="display: none;" class="form-container">
             <h4>Weapon Enhancements</h4>
             <button type="button" class="big" style="position: relative; top: 300px; width: 400px;" onclick="closeForm()">Close</button>
         </form>
     </div>
     <div style="position:absolute; top: 640px; left: 10px;">
-        <button id="button17" type="button" onclick="purchase17()" class="big">Buy Missile! ($200)</button>
-        <button id="button18" type="button" onclick="purchase18()" class="big">Buy Scatter Missile! ($750)</button>
-        <button id="button19" type="button" onclick="purchase19()" class="big">Buy Toxic Missile! ($1500)</button>
-        <button id="button20" type="button" onclick="purchase20()" class="big">Buy Shock Missile! ($3000)</button>
+        <button style="display: none;" id="button17" type="button" onclick="purchase17()" class="big">Buy Missile! ($200)</button>
+        <button style="display: none;" id="button18" type="button" onclick="purchase18()" class="big">Buy Scatter Missile! ($750)</button>
+        <button style="display: none;" id="button19" type="button" onclick="purchase19()" class="big">Buy Toxic Missile! ($1500)</button>
+        <button style="display: none;" id="button20" type="button" onclick="purchase20()" class="big">Buy Shock Missile! ($3000)</button>
         <button style="display: none;" id="button21" type="button" onclick="purchase21()" class="big">Buy Titan's Bane! ($12500)</button>
         <button style="display: none;" id="button22" type="button" onclick="purchase22()" class="big">Buy Meltdown! ($12500)</button>
         <button style="display: none;" id="button23" type="button" onclick="purchase23()" class="big">Buy World Breaker! ($12500)</button>
@@ -107,7 +107,7 @@
     <p style="position:absolute; top: 20px; left: 240px;" id="laser-ui"></p>
     <p style="position:absolute; top: 40px; left: 240px;" id="utility-ui"></p>
     <p style="position:absolute; top: 60px; left: 240px;" id="military-ui"></p>
-    <script src="js/game.js "></script>
+    <script src="js/game.js"></script>
     <div style="position:absolute; top: 10px; left: 980px;">
         <h3>Welcome to Cubes vs Circles!</h3>Your objective is to keep the cubes from reaching the edge of the screen. Click the buttons to buy upgrades to help you defend! <br>
         <h4>Patch Notes (v0.5.2)</h4>
