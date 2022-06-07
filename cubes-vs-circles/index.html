@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubes vs Circles</title>
+    <style>
+        .big {
+            /* Button UI */
+            background-color: #154f30;
+            border: none;
+            color: #ffffff;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            width: 170.7px;
+            height: 65px;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body style="background-color: #323639; zoom: 90%;">
+    <!-- canvas row 1 -->
+    <canvas id="map" width="960px" height="480px" style="border: 1px solid #000000;background-color: #6b6b6b;"></canvas>
+    <!-- upgrade row 1 -->
+    <div style="position:absolute; top: 500px; left: 10px;">
+        <button id="button1" type="button" onclick="purchase1()" class="big">Buy Cannon! (Free)</button>
+        <button id="button2" type="button" onclick="purchase2()" class="big">Buy Multi Cannon! ($300)</button>
+        <button id="button13" type="button" onclick="purchase13()" class="big">Buy Cannon Factory! ($1200)</button>
+        <button id="button3" type="button" onclick="purchase3()" class="big">Buy Huge Cannon! ($1600)</button>
+        <button id="button4" type="button" onclick="purchase4()" class="big">Buy Laser! ($675)</button>
+        <button id="button5" type="button" onclick="purchase5()" class="big">Buy Frost Laser! ($1250)</button>
+        <button id="button14" type="button" onclick="purchase14()" class="big">Buy Pierce Laser! ($2000)</button>
+        <button id="button6" type="button" onclick="purchase6()" class="big">Buy Chain Laser! ($2400)</button>
+    </div>
+    <!-- upgrade row 2 -->
+    <div style="position:absolute; top: 570px; left: 10px;">
+        <button id="button7" type="button" onclick="purchase7()" class="big">Kill Random! ($50)</button>
+        <button id="button8" type="button" onclick="purchase8()" class="big">Slow All! ($100)</button>
+        <button id="button15" type="button" onclick="purchase15()" class="big">Buy Scatter Cannon! ($800)</button>
+        <button id="button9" type="button" onclick="purchase9()" class="big">Buy Bank! ($500)</button>
+        <button id="button10" type="button" onclick="purchase10()" class="big">Upgrade Cannons! ($2500)</button>
+        <button id="button11" type="button" onclick="purchase11()" class="big">Upgrade Lasers! ($2500)</button>
+        <button id="button16" type="button" onclick="purchase16()" class="big">Upgrade Missiles! ($2500)</button>
+        <button style="display: none;" id="button12" type="button" onclick="purchase12()" class="big">Upgrade Utility! ($2500)</button>
+    </div>
+    <!-- upgrade row 3 -->
+    <div style="position:absolute; top: 640px; left: 10px;">
+        <button style="display: none;" id="button17" type="button" onclick="purchase17()" class="big">Buy Missile! ($200)</button>
+        <button style="display: none;" id="button18" type="button" onclick="purchase18()" class="big">Buy Scatter Missile! ($750)</button>
+        <button style="display: none;" id="button19" type="button" onclick="purchase19()" class="big">Buy Toxic Missile! ($1500)</button>
+        <button style="display: none;" id="button20" type="button" onclick="purchase20()" class="big">Buy Shock Missile! ($3000)</button>
+        <button style="display: none;" id="button21" type="button" onclick="purchase21()" class="big">Buy Titan's Bane! ($12500)</button>
+        <button style="display: none;" id="button22" type="button" onclick="purchase22()" class="big">Buy Meltdown! ($12500)</button>
+        <button style="display: none;" id="button23" type="button" onclick="purchase23()" class="big">Buy World Breaker! ($12500)</button>
+        <button style="display: none;" id="button24" type="button" onclick="purchase24()" class="big">Buy Circle Center! ($12500)</button>
+    </div>
+    <!-- top ui -->
+    <p style="position:absolute; top: 0px; left: 16px;" id="round-ui"></p>
+    <p style="position:absolute; top: 20px; left: 16px;" id="money-ui"></p>
+    <p style="position:absolute; top: 40px; left: 16px;" id="lives-ui"></p>
+    <p style="position:absolute; top: 60px; left: 16px;" id="bank-ui"></p>
+    <p style="position:absolute; top: 0px; left: 240px;" id="canon-ui"></p>
+    <p style="position:absolute; top: 20px; left: 240px;" id="laser-ui"></p>
+    <p style="position:absolute; top: 40px; left: 240px;" id="utility-ui"></p>
+    <p style="position:absolute; top: 60px; left: 240px;" id="military-ui"></p>
+    <!-- patch notes text -->
+    <div style="position:absolute; top: 10px; left: 980px;">
+        <h3>Welcome to Cubes vs Circles!</h3>Your objective is to keep the cubes from reaching the edge of the screen. Click the buttons to buy upgrades to help you defend! <br>
+        <h4>Patch Notes (v0.5.2)</h4>
+        New: Cube Immunities <br> New: Pierce Laser <br> New: Scatter Cannon <br> New: Bank Visuals <br> New: Money UI <br> Reworked: End of Round Cash Reward <br> Reworked: Cube Scaling <br> Updated: Building Names <br> Updated: Bank Cost <br> + Balance
+        Changes and Bug Fixes Throughout
+    </div>
+    <!-- link script -->
+    <script src="js/game.js"></script>
+</body>
+
+</html>
