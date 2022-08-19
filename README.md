@@ -1,2 +1,5 @@
 # jgoetzmann.github.io
-random stuff I do
+random stuff i do
+
+
+made by a avid goomy enjoyer
