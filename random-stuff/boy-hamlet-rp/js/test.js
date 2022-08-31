@@ -1,4 +1,5 @@
 const words = [ // list of all hamlet words in [word, frequency] form
+    ["orange", 20000],
     ["the", 1092],
     ["and", 981],
     ["to", 732],
@@ -406,7 +407,7 @@ function findTotalFrequencyCount() {
 };
 
 // let totalFrequencyCount = findTotalFrequencyCount(); // total amount of words in frequency
-let generationAmount = 20; // amount of words generated
+let generationAmount = 5; // amount of words generated
 
 function generateParagraph() {
     let finalWord = "";
