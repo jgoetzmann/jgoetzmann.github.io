@@ -406,25 +406,42 @@ function findTotalFrequencyCount() {
 };
 
 // let totalFrequencyCount = findTotalFrequencyCount(); // total amount of words in frequency
-let generationAmount = 20; // amount of words generated
+let generationAmount = 7; // amount of words generated
+let output = document.getElementById("output"); // sets output to output on UI
 
-function generateParagraph() {
-    let finalWord = "";
-    for (i = 0; i < generationAmount; i++) {
-        let wordFinder = Math.ceil(Math.random() * findTotalFrequencyCount());
-        console.log(i)
-        console.log(wordFinder)
-        for (j = 0; j < words.length; j++) {
-            console.log(wordFinder)
-            wordFinder -= words[j][1];
-            if (wordFinder <= 0) {
-                finalWord += words[j][0] + " ";
-                j = words.length;
+function generateParagraph() { // generates the string of words
+    let finalWord = ""; // placeholder string 
+    for (i = 0; i < generationAmount; i++) { // loops through based on generation amount
+        let wordFinder = Math.ceil(Math.random() * findTotalFrequencyCount()); // generates a number between 1 and total sum of frequency
+        for (j = 0; j < words.length; j++) { // loops through array
+            wordFinder -= words[j][1]; // for each instance in array subtracts the frequency from the generated word
+            if (wordFinder <= 0) { // if the generated word is less than 1 after subtraction
+                if ((generationAmount - 1) === i) { // if last generated word
+                    finalWord += words[j][0] + "."; // adds final word to string with period 
+                } else { // for every other case
+                    finalWord += words[j][0] + " "; // adds word to string
+                };
+                j = words.length; // ends loop
             };
-            console.log(finalWord)
+            console.log(finalWord); // debugs to show growth of string
         };
     };
-    return finalWord;
+    return finalWord; // returns final string of words
 };
 
-console.log(generateParagraph())
+function amendArray() { // when "Configure" button is clicked
+    let chosen = Number(prompt("What do you Want to Edit? \n(1) Possible List of Words \n(2) Amount of Words per Generation \n(3) Exit")); // opens dialog box
+    if (chosen === 1) { // if "Possibe list of words" is chosen
+        let insertedWord = prompt("What Word do you Want to be Added to the List of Possible Words?"); // prompts for word you want to add to list
+        let insertedFrequency = Number(prompt("How Many Copies of the Word do you Want to put in the List? \n(Total Amount of Words in List : " + findTotalFrequencyCount() + ")")); // prompts for frequency number of word for the array
+        words.push([insertedWord, insertedFrequency]); // adds to array
+    } else if (chosen === 2) { // if "Amount of words per generation" is chosen
+        generationAmount = Number(prompt("How Many Words do you Want to be Generated per Unique Generation?")); // prompts generation amount length
+    };
+};
+
+function generateText() { // when "Generate Text" button is clicked
+    output.innerHTML = generateParagraph(); // finds string and sets UI to that string
+};
+
+// end
