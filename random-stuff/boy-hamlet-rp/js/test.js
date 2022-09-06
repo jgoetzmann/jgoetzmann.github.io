@@ -1,5 +1,5 @@
 const words = [ // list of all hamlet words in [word, frequency] form
-    ["the", 1092],
+    ["the", 1092], // debug
     ["and", 981],
     ["to", 732],
     ["of", 668],
