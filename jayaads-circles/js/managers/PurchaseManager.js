@@ -16,6 +16,7 @@ export class PurchaseManager {
         const cost = this.costs[costKey];
         if (this.canAfford(cost)) {
             this.gameState.subtractMoney(cost);
+            this.gameState.recordMoneySpent(cost);
             this.costs[costKey] += COST_INCREMENTS[costKey] || COST_INCREMENTS.UPGRADE;
             if (callback) callback();
             return true;
@@ -36,6 +37,7 @@ export class PurchaseManager {
 
         if (placement && this.purchase(costKey)) {
             this.spawnManager.spawnBuilding(buildingType, placement.x, placement.y);
+            this.gameState.recordBuildingPlaced();
             return true;
         }
         return false;

@@ -5,6 +5,7 @@ import { CollisionManager } from './managers/CollisionManager.js';
 import { PurchaseManager } from './managers/PurchaseManager.js';
 import { UpgradeManager } from './managers/UpgradeManager.js';
 import { UIManager } from './managers/UIManager.js';
+import { HighScoreManager } from './managers/HighScoreManager.js';
 import { Projectile } from './entities/Projectile.js';
 import { GAME_CONFIG, BUILDING_TYPES } from './utils/Constants.js';
 
@@ -16,9 +17,78 @@ const upgradeManager = new UpgradeManager(spawnManager);
 const purchaseManager = new PurchaseManager(gameState, spawnManager, upgradeManager);
 const attackManager = new AttackManager();
 const uiManager = new UIManager(map, gameState);
+const highScoreManager = new HighScoreManager();
+
+// Make highScoreManager globally accessible for menu
+window.highScoreManager = highScoreManager;
 
 // Link spawnManager to gameState for upgrades
 spawnManager.gameState = gameState;
+
+// Tab visibility handling
+let isTabVisible = !document.hidden;
+document.addEventListener('visibilitychange', () => {
+    isTabVisible = !document.hidden;
+    if (!isTabVisible && !gameState.runWhenHidden) {
+        gameState.isPaused = true;
+    } else if (isTabVisible) {
+        gameState.isPaused = false;
+    }
+});
+
+
+function startNewGame() {
+    gameState.reset();
+    spawnManager.getEnemies().length = 0;
+    spawnManager.getBuildings().length = 0;
+    attackManager.getProjectiles().length = 0;
+    uiManager.moneyGains.length = 0;
+    gameState.startGame();
+    uiManager.hideMenu();
+}
+
+window.restartGame = startNewGame;
+
+// Wait for DOM to be ready for menu button
+setTimeout(() => {
+    const startBtn = document.getElementById('start-game-btn');
+    if (startBtn) {
+        startBtn.addEventListener('click', startNewGame);
+    }
+    
+    const runWhenHiddenCheckbox = document.getElementById('run-when-hidden');
+    if (runWhenHiddenCheckbox) {
+        runWhenHiddenCheckbox.addEventListener('change', (e) => {
+            gameState.runWhenHidden = e.target.checked;
+            if (e.target.checked) {
+                gameState.isPaused = false;
+            } else if (!isTabVisible) {
+                gameState.isPaused = true;
+            }
+        });
+    }
+    
+    // Fast forward button
+    const fastForwardBtn = document.getElementById('fast-forward-btn');
+    if (fastForwardBtn) {
+        fastForwardBtn.addEventListener('click', () => {
+            // Cycle through speeds: 1x -> 3x -> 5x -> 1x
+            if (gameState.speedMultiplier === 1) {
+                gameState.speedMultiplier = 3;
+                fastForwardBtn.textContent = '⏩ Fast Forward (3x)';
+                fastForwardBtn.style.backgroundColor = '#ff6b00';
+            } else if (gameState.speedMultiplier === 3) {
+                gameState.speedMultiplier = 5;
+                fastForwardBtn.textContent = '⏩ Fast Forward (5x)';
+                fastForwardBtn.style.backgroundColor = '#ff3636';
+            } else {
+                gameState.speedMultiplier = 1;
+                fastForwardBtn.textContent = '⏩ Fast Forward (1x)';
+                fastForwardBtn.style.backgroundColor = '#555';
+            }
+        });
+    }
+}, 100);
 
 // Purchase functions (global for onclick handlers)
 window.purchase1 = function() {
@@ -164,6 +234,10 @@ function processBuildingAttacks() {
         
         // Handle attacks
         if (building.canAttack(gameState.round)) {
+            // Track damage
+            if (building.damage > 0) {
+                gameState.recordDamage(building.damage);
+            }
             let enemyTarget = false;
             const superLaserTargets = [];
             
@@ -207,6 +281,7 @@ function processBuildingAttacks() {
                 case 19: // bank
                     const moneyAward = 15 + (5 * gameState.utilityLevel);
                     gameState.addMoney(moneyAward);
+                    gameState.recordMoneyEarned(moneyAward);
                     uiManager.addMoneyGain(moneyAward, building.positionX, building.positionY - 20);
                     continue;
             }
@@ -221,26 +296,26 @@ function processBuildingAttacks() {
             break;
                     case 2: // huge cannon
                         attackManager.attackHugeCannon(building, enemy, gameState.canonLevel, attackManager.getProjectiles());
-                        break;
-                    case 3: // laser
+            break;
+        case 3: // laser
                         attackManager.attackLaser(building, enemy, gameState.laserLevel);
                         attackManager.getProjectiles().push(new Projectile(
                             building.positionX, building.positionY,
                             enemy.getCenterX(), enemy.getCenterY(),
                             3, 5
                         ));
-                        break;
-                    case 4: // frost laser
+            break;
+        case 4: // frost laser
                         attackManager.attackFrostLaser(building, enemy);
                         attackManager.getProjectiles().push(new Projectile(
                             building.positionX, building.positionY,
                             enemy.getCenterX(), enemy.getCenterY(),
                             4, 5
                         ));
-                        break;
+            break;
                     case 17: // moving cannon
                         attackManager.attackCannon(building, enemy, attackManager.getProjectiles());
-                        break;
+            break;
                 }
             }
             
@@ -252,13 +327,13 @@ function processBuildingAttacks() {
                         break;
                     case 5: // chain laser
                         attackManager.attackChainLaser(building, superLaserTargets, enemies, attackManager.getProjectiles());
-                        break;
-                    case 7: // pierce laser
+                            break;
+                        case 7: // pierce laser
                         const result = attackManager.attackPierceLaser(building, superLaserTargets, enemies);
                         if (result.projectile) {
                             attackManager.getProjectiles().push(result.projectile);
-                        }
-                        break;
+                                }
+                                break;
                 }
             }
         }
@@ -274,6 +349,8 @@ function clearDeadEnemies() {
             const moneyAward = Math.floor(enemy.size * (1.6 + (0.4 * gameState.utilityLevel)));
             if (enemy.id !== 0) {
                 gameState.addMoney(moneyAward);
+                gameState.recordMoneyEarned(moneyAward);
+                gameState.recordKill();
                 uiManager.addMoneyGain(moneyAward, enemy.getCenterX(), enemy.positionY - 20);
             }
             spawnManager.removeEnemy(enemy);
@@ -285,18 +362,22 @@ function endRoundCash() {
     if (gameState.shouldEndRound()) {
         const endOfRoundMoney = 90 + (gameState.round / 100);
         gameState.addMoney(endOfRoundMoney);
+        gameState.recordMoneyEarned(endOfRoundMoney);
         uiManager.addMoneyGain(endOfRoundMoney, 190, 42);
     }
 }
 
 function gameLoop() {
-    if (!gameState.updateUI) return;
-    
+    // This function now runs at fixed intervals (20ms)
+    // All state checks are done in timeBasedGameLoop
     gameState.incrementRound();
     
     // Spawn units
     if (gameState.shouldSpawnUnit()) {
-        spawnManager.spawnEnemy(gameState.round);
+        const enemy = spawnManager.spawnEnemy(gameState.round);
+        if (enemy) {
+            gameState.recordEnemySpawned();
+        }
     }
     
     // Update game
@@ -331,11 +412,27 @@ function gameLoop() {
     uiManager.updateStats();
     
     // Check game over
-    if (gameState.isGameOver()) {
-        alert(`Game Over! You got to round: ${gameState.getRoundNumber()}! Refresh to Play Again!`);
+    if (gameState.isGameOver() && gameState.updateUI) {
         gameState.updateUI = false;
+        gameState.stats.endTime = Date.now();
         gameState.lives = 'Dead';
         uiManager.updateStats();
+        
+        const finalStats = {
+            round: gameState.getRoundNumber(),
+            kills: gameState.stats.kills,
+            moneyEarned: gameState.stats.moneyEarned,
+            moneySpent: gameState.stats.moneySpent,
+            buildingsPlaced: gameState.stats.buildingsPlaced,
+            totalDamage: gameState.stats.totalDamage,
+            duration: gameState.getGameDuration()
+        };
+        
+        // Save high score
+        highScoreManager.saveHighScore(finalStats);
+        
+        // Show death popup
+        uiManager.showDeathPopup(finalStats, highScoreManager);
     }
     
     // Check win condition
@@ -344,5 +441,49 @@ function gameLoop() {
     }
 }
 
-// Start game loop
-setInterval(gameLoop, GAME_CONFIG.GAME_LOOP_INTERVAL);
+// Time-based game loop to handle tab throttling
+let lastUpdateTime = performance.now();
+let accumulatedTime = 0;
+const TARGET_FPS = 50; // 50 FPS = 20ms per frame
+const FRAME_TIME = 1000 / TARGET_FPS;
+
+function timeBasedGameLoop(currentTime) {
+    if (!gameState.updateUI || gameState.isMenuOpen) {
+        requestAnimationFrame(timeBasedGameLoop);
+        return;
+    }
+    
+    if (gameState.isPaused) {
+        lastUpdateTime = currentTime;
+        requestAnimationFrame(timeBasedGameLoop);
+        return;
+    }
+    
+    // Calculate delta time
+    const deltaTime = currentTime - lastUpdateTime;
+    lastUpdateTime = currentTime;
+    
+    // Accumulate time (multiplied by speed)
+    accumulatedTime += deltaTime * gameState.speedMultiplier;
+    
+    // Run game updates in fixed steps
+    // This ensures consistent game speed even if browser throttles
+    const maxSteps = Math.min(5 * gameState.speedMultiplier, 20); // Prevent spiral of death, but allow more steps for fast forward
+    let steps = 0;
+    
+    while (accumulatedTime >= FRAME_TIME && steps < maxSteps) {
+        gameLoop();
+        accumulatedTime -= FRAME_TIME;
+        steps++;
+    }
+    
+    // Cap accumulated time to prevent huge jumps when tab becomes visible
+    if (accumulatedTime > FRAME_TIME * 10) {
+        accumulatedTime = FRAME_TIME * 10;
+    }
+    
+    requestAnimationFrame(timeBasedGameLoop);
+}
+
+// Start the game loop
+requestAnimationFrame(timeBasedGameLoop);

@@ -14,6 +14,180 @@ export class UIManager {
         this.canonUI = document.getElementById('canon-ui');
         this.laserUI = document.getElementById('laser-ui');
         this.utilityUI = document.getElementById('utility-ui');
+        this.initMenu();
+    }
+    
+    initMenu() {
+        // Create menu overlay
+        const menuOverlay = document.createElement('div');
+        menuOverlay.id = 'menu-overlay';
+        menuOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        `;
+        
+        const menuContent = document.createElement('div');
+        menuContent.style.cssText = `
+            background: #323639;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            max-width: 500px;
+        `;
+        
+        menuContent.innerHTML = `
+            <h1 style="font-size: 48px; margin-bottom: 20px;">Cubes vs Circles</h1>
+            <h2 style="font-size: 24px; margin-bottom: 30px;">v0.6.1</h2>
+            <button id="start-game-btn" style="
+                background: #154f30;
+                color: white;
+                border: none;
+                padding: 15px 40px;
+                font-size: 20px;
+                cursor: pointer;
+                margin: 10px;
+                border-radius: 5px;
+            ">Start Game</button>
+            <br>
+            <label style="display: block; margin-top: 20px;">
+                <input type="checkbox" id="run-when-hidden" style="margin-right: 10px;">
+                Run game when tab is hidden
+            </label>
+            <div id="high-scores" style="margin-top: 30px; text-align: left;">
+                <h3>High Scores</h3>
+                <div id="high-scores-list"></div>
+            </div>
+        `;
+        
+        menuOverlay.appendChild(menuContent);
+        document.body.appendChild(menuOverlay);
+        
+        document.getElementById('start-game-btn').addEventListener('click', () => {
+            this.hideMenu();
+        });
+        
+        this.updateHighScores();
+    }
+    
+    showMenu() {
+        const overlay = document.getElementById('menu-overlay');
+        if (overlay) overlay.style.display = 'flex';
+        this.updateHighScores();
+    }
+    
+    hideMenu() {
+        const overlay = document.getElementById('menu-overlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+    
+    updateHighScores() {
+        const list = document.getElementById('high-scores-list');
+        if (!list) return;
+        
+        // This will be populated by HighScoreManager
+        const highScoreManager = window.highScoreManager;
+        if (highScoreManager) {
+            const scores = highScoreManager.getHighScores();
+            if (scores.length === 0) {
+                list.innerHTML = '<p style="color: #999;">No high scores yet!</p>';
+            } else {
+                list.innerHTML = scores.map((score, idx) => `
+                    <div style="padding: 5px; border-bottom: 1px solid #555;">
+                        <strong>#${idx + 1}</strong> Round ${score.round} | 
+                        ${score.kills} Kills | 
+                        ${score.moneyEarned} Money
+                    </div>
+                `).join('');
+            }
+        }
+    }
+    
+    showDeathPopup(stats, highScoreManager) {
+        const popup = document.createElement('div');
+        popup.id = 'death-popup';
+        popup.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        `;
+        
+        const isNewHigh = highScoreManager.isNewHighScore(stats.round, stats.kills);
+        
+        const popupContent = document.createElement('div');
+        popupContent.style.cssText = `
+            background: #323639;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        `;
+        
+        popupContent.innerHTML = `
+            <h1 style="font-size: 36px; margin-bottom: 20px; color: #ff3636;">Game Over!</h1>
+            ${isNewHigh ? '<h2 style="color: #ffd700; margin-bottom: 20px;">🏆 NEW HIGH SCORE! 🏆</h2>' : ''}
+            <div style="text-align: left; margin: 20px 0;">
+                <h3>Game Summary</h3>
+                <p><strong>Round Reached:</strong> ${stats.round}</p>
+                <p><strong>Enemies Killed:</strong> ${stats.kills}</p>
+                <p><strong>Money Earned:</strong> $${stats.moneyEarned}</p>
+                <p><strong>Money Spent:</strong> $${stats.moneySpent}</p>
+                <p><strong>Buildings Placed:</strong> ${stats.buildingsPlaced}</p>
+                <p><strong>Total Damage Dealt:</strong> ${Math.floor(stats.totalDamage)}</p>
+                <p><strong>Time Played:</strong> ${this.gameState.formatTime(stats.duration)}</p>
+            </div>
+            <button id="play-again-btn" style="
+                background: #154f30;
+                color: white;
+                border: none;
+                padding: 15px 40px;
+                font-size: 20px;
+                cursor: pointer;
+                margin: 10px;
+                border-radius: 5px;
+            ">Play Again</button>
+            <button id="main-menu-btn" style="
+                background: #555;
+                color: white;
+                border: none;
+                padding: 15px 40px;
+                font-size: 20px;
+                cursor: pointer;
+                margin: 10px;
+                border-radius: 5px;
+            ">Main Menu</button>
+        `;
+        
+        popup.appendChild(popupContent);
+        document.body.appendChild(popup);
+        
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            document.body.removeChild(popup);
+            if (window.restartGame) window.restartGame();
+        });
+        
+        document.getElementById('main-menu-btn').addEventListener('click', () => {
+            document.body.removeChild(popup);
+            this.showMenu();
+        });
     }
 
     updateStats() {
