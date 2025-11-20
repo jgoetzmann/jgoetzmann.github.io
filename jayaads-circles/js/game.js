@@ -21,104 +21,104 @@ const uiManager = new UIManager(map, gameState);
 spawnManager.gameState = gameState;
 
 // Purchase functions (global for onclick handlers)
-function purchase1() {
+window.purchase1 = function() {
     if (purchaseManager.purchaseCannon()) {
         uiManager.updateButtonText('button1', `Buy Cannon! ($${purchaseManager.getCost('CANNON')})`);
     }
-}
+};
 
-function purchase2() {
+window.purchase2 = function() {
     if (purchaseManager.purchaseMultiCannon()) {
         uiManager.updateButtonText('button2', `Buy Multi Cannon! ($${purchaseManager.getCost('MULTI_CANNON')})`);
     }
-}
+};
 
-function purchase3() {
+window.purchase3 = function() {
     if (purchaseManager.purchaseHugeCannon()) {
         uiManager.updateButtonText('button3', `Buy Huge Cannon! ($${purchaseManager.getCost('HUGE_CANNON')})`);
     }
-}
+};
 
-function purchase4() {
+window.purchase4 = function() {
     if (purchaseManager.purchaseLaser()) {
         uiManager.updateButtonText('button4', `Buy Laser! ($${purchaseManager.getCost('LASER')})`);
     }
-}
+};
 
-function purchase5() {
+window.purchase5 = function() {
     if (purchaseManager.purchaseFrostLaser()) {
         uiManager.updateButtonText('button5', `Buy Frost Laser! ($${purchaseManager.getCost('FROST_LASER')})`);
     }
-}
+};
 
-function purchase6() {
+window.purchase6 = function() {
     if (purchaseManager.purchaseChainLaser()) {
         uiManager.updateButtonText('button6', `Buy Chain Laser! ($${purchaseManager.getCost('CHAIN_LASER')})`);
     }
-}
+};
 
-function purchase7() {
+window.purchase7 = function() {
     if (purchaseManager.purchaseKillRandom()) {
         uiManager.updateButtonText('button7', `Kill Random! ($${purchaseManager.getCost('KILL_RANDOM')})`);
     }
-}
+};
 
-function purchase8() {
+window.purchase8 = function() {
     if (purchaseManager.purchaseSlowAll()) {
         uiManager.updateButtonText('button8', `Slow All! ($${purchaseManager.getCost('SLOW_ALL')})`);
     }
-}
+};
 
-function purchase9() {
+window.purchase9 = function() {
     if (purchaseManager.purchaseBank()) {
         uiManager.updateButtonText('button9', `Buy Bank! ($${purchaseManager.getCost('BANK')})`);
     }
-}
+};
 
-function purchase10() {
+window.purchase10 = function() {
     if (purchaseManager.purchaseUpgradeCannons()) {
         uiManager.updateButtonText('button10', `Upgrade Cannons! ($${purchaseManager.getCost('UPGRADE_CANNONS')})`);
     }
-}
+};
 
-function purchase11() {
+window.purchase11 = function() {
     if (purchaseManager.purchaseUpgradeLasers()) {
         uiManager.updateButtonText('button11', `Upgrade Lasers! ($${purchaseManager.getCost('UPGRADE_LASERS')})`);
     }
-}
+};
 
-function purchase12() {
+window.purchase12 = function() {
     if (purchaseManager.purchaseUpgradeUtility()) {
         uiManager.updateButtonText('button12', `Upgrade Utility! ($${purchaseManager.getCost('UPGRADE_UTILITY')})`);
     }
-}
+};
 
-function purchase13() {
+window.purchase13 = function() {
     if (purchaseManager.purchaseCannonFactory()) {
         uiManager.updateButtonText('button13', `Buy Cannon Factory! ($${purchaseManager.getCost('CANNON_FACTORY')})`);
     }
-}
+};
 
-function purchase14() {
+window.purchase14 = function() {
     if (purchaseManager.purchasePierceLaser()) {
         uiManager.updateButtonText('button14', `Buy Pierce Laser! ($${purchaseManager.getCost('PIERCE_LASER')})`);
     }
-}
+};
 
-function purchase15() {
+window.purchase15 = function() {
     if (purchaseManager.purchaseScatterCannon()) {
         uiManager.updateButtonText('button15', `Buy Scatter Cannon! ($${purchaseManager.getCost('SCATTER_CANNON')})`);
     }
-}
+};
 
 // Form functions
-function openForm() {
+window.openForm = function() {
     document.getElementById('myForm').style.display = 'block';
-}
+};
 
-function closeForm() {
+window.closeForm = function() {
     document.getElementById('myForm').style.display = 'none';
-}
+};
 
 // Game loop functions
 function updateEnemyPositions() {
