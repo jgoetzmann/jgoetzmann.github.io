@@ -5,6 +5,11 @@ export class PurchaseManager {
         this.gameState = gameState;
         this.spawnManager = spawnManager;
         this.upgradeManager = upgradeManager;
+        this.costs = {};
+        this.resetCosts();
+    }
+    
+    resetCosts() {
         this.costs = { ...PURCHASE_COSTS };
     }
 
@@ -98,7 +103,9 @@ export class PurchaseManager {
                     enemies[randomTarget].dead = true;
                 }
             }
-            this.costs.KILL_RANDOM += Math.floor(this.gameState.getRoundNumber() / 1000) * 5;
+            // Cost scaling based on wave instead of round
+            const wave = window.waveManager ? window.waveManager.currentWave : 0;
+            this.costs.KILL_RANDOM += Math.floor(wave / 10) * 5;
             return true;
         }
         return false;
@@ -116,7 +123,9 @@ export class PurchaseManager {
             for (const enemy of enemies) {
                 enemy.setSpeed(enemy.baseSpeed * slowAmount);
             }
-            this.costs.SLOW_ALL += Math.floor(this.gameState.getRoundNumber() / 1000) * 5;
+            // Cost scaling based on wave instead of round
+            const wave = window.waveManager ? window.waveManager.currentWave : 0;
+            this.costs.SLOW_ALL += Math.floor(wave / 10) * 5;
             return true;
         }
         return false;

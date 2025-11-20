@@ -1,7 +1,9 @@
 import { Enemy } from '../entities/Enemy.js';
 import { Building } from '../entities/Building.js';
-import { ENEMY_TYPES, ENEMY_PROPERTIES, BUILDING_TYPES, GAME_CONFIG } from '../utils/Constants.js';
+import { BUILDING_TYPES, GAME_CONFIG } from '../utils/Constants.js';
 import { PositionHelper, CollisionHelper } from '../utils/Helpers.js';
+import { ModifierManager } from '../utils/ModifierSystem.js';
+import { EnemyThreatCalculator } from '../utils/EnemyThreatCalculator.js';
 
 export class SpawnManager {
     constructor() {
@@ -9,39 +11,70 @@ export class SpawnManager {
         this.buildings = [];
     }
 
-    // Enemy spawning
-    chooseEnemyType(round) {
-        const randomChoice = Math.ceil(Math.random() * 100);
-        for (let i = Object.keys(ENEMY_TYPES).length - 1; i > 0; i--) {
-            if (randomChoice < (round / 100) - (i * 30) + 60) {
-                return i;
-            }
-        }
-        return 0; // nil
+    // Determine enemy level based on round
+    chooseEnemyLevel(round) {
+        const roundNumber = Math.floor(round / GAME_CONFIG.ROUND_DURATION);
+        // Level scales with round: early rounds = level 1-2, later = higher (up to 10)
+        if (roundNumber < 5) return 1;
+        if (roundNumber < 10) return Math.random() < 0.7 ? 1 : 2;
+        if (roundNumber < 20) return Math.random() < 0.5 ? 2 : 3;
+        if (roundNumber < 30) return Math.random() < 0.5 ? 3 : 4;
+        if (roundNumber < 50) return Math.random() < 0.5 ? 4 : 5;
+        if (roundNumber < 70) return Math.random() < 0.5 ? 5 : 6;
+        if (roundNumber < 100) return Math.random() < 0.5 ? 6 : 7;
+        if (roundNumber < 150) return Math.random() < 0.5 ? 7 : 8;
+        if (roundNumber < 200) return Math.random() < 0.5 ? 8 : 9;
+        return Math.min(10, Math.floor(roundNumber / 30) + 1);
     }
 
-    determineEnemyProperty(round) {
-        const randomChoice = Math.ceil(Math.random() * 100);
-        if (randomChoice < ((round - 12000) / 1000) && randomChoice <= 50) {
-            return ENEMY_PROPERTIES.BLUE;
-        } else if (randomChoice > ((112000 - round) / 1000) && randomChoice > 50) {
-            return ENEMY_PROPERTIES.RED;
-        }
-        return ENEMY_PROPERTIES.NONE;
+    // Get max modifiers based on round progression
+    getMaxModifiers(round) {
+        const roundNumber = Math.floor(round / GAME_CONFIG.ROUND_DURATION);
+        // Start with 0 modifiers, increase as rounds progress
+        if (roundNumber < 5) return 0;
+        if (roundNumber < 10) return 1;
+        if (roundNumber < 20) return 2;
+        return 3; // Max 3 modifiers
     }
 
     spawnEnemy(round) {
-        const enemyTypeId = this.chooseEnemyType(round);
-        if (enemyTypeId === 0) return null; // nil
+        // Legacy method for backward compatibility
+        // Choose enemy level
+        const level = this.chooseEnemyLevel(round);
+        
+        // Determine position
+        const positionY = PositionHelper.positionOffset(75);
+        
+        // Select modifiers based on round progression
+        const maxModifiers = this.getMaxModifiers(round);
+        let modifiers = [];
+        
+        if (maxModifiers > 0) {
+            // Threat budget increases with round
+            const roundNumber = Math.floor(round / GAME_CONFIG.ROUND_DURATION);
+            const threatBudget = 2.0 + (roundNumber * 0.5); // More threat available as rounds progress
+            modifiers = ModifierManager.selectModifiers(threatBudget, maxModifiers);
+        }
+        
+        // Create enemy with level and modifiers
+        const enemy = new Enemy(level, null, positionY, modifiers);
 
-        const positionY = PositionHelper.getEnemySpawnY(enemyTypeId);
-        const property = this.determineEnemyProperty(round);
+        this.enemies.push(enemy);
+        return enemy;
+    }
+
+    spawnEnemyForWave(level, modifiers = [], isFortified = false) {
+        // New method for wave-based spawning
+        // Determine position
+        const positionY = PositionHelper.positionOffset(75);
         
-        const enemy = new Enemy(enemyTypeId, null, positionY, property);
+        // Create enemy with level and modifiers
+        const enemy = new Enemy(level, null, positionY, modifiers);
         
-        // Boss scaling
-        if (enemyTypeId === 11) {
-            enemy.scaleHp(500);
+        // Set fortified status if needed
+        if (isFortified) {
+            enemy.isFortified = true;
+            enemy.shape = 'hexagon';
         }
 
         this.enemies.push(enemy);

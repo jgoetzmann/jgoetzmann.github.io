@@ -1,4 +1,4 @@
-import { BUILDING_TYPES, BUILDING_COLORS } from '../utils/Constants.js';
+import { BUILDING_TYPES, BUILDING_COLORS, DAMAGE_TYPES, TOWER_CATEGORIES } from '../utils/Constants.js';
 
 export class Building {
     constructor(typeId, positionX, positionY, level = 1) {
@@ -14,12 +14,34 @@ export class Building {
         this.positionY = positionY;
         this.size = type.size;
         this.range = type.range;
-        this.attackSpeed = type.attackSpeed;
-        this.damage = type.damage;
+        this.attackSpeed = type.attackSpeed; // Attack speed stat
+        this.damage = type.damage; // Base damage
         this.targets = type.targets;
         this.level = level;
         this.buffs = 0;
         this.lastAttackFrame = 0;
+        
+        // New stats system
+        this.category = type.category || TOWER_CATEGORIES.DAMAGE;
+        this.damageFamily = type.damageFamily || DAMAGE_TYPES.PHYSICAL;
+        this.damageTypes = type.damageTypes || {[type.damageFamily || DAMAGE_TYPES.PHYSICAL]: 1.0};
+        
+        // Penetration (default 0)
+        this.penetration = type.penetration || {};
+        // Format: {[damageType]: {percent: 0, flat: 0}}
+        
+        // Crit stats (default 0/100)
+        this.critChance = type.critChance || 0;
+        this.critDamage = type.critDamage || 100;
+        
+        // Fortified scaler (default 1.0)
+        this.fortifiedScaler = type.fortifiedScaler || 1.0;
+        
+        // CC Resist
+        this.ccResist = type.ccResist || 0;
+        
+        // Damage buff (stacks linearly)
+        this.damageBuff = 1.0;
     }
 
     canAttack(currentRound) {
@@ -40,6 +62,11 @@ export class Building {
 
     upgradeTargets(amount) {
         this.targets += amount;
+    }
+    
+    addDamageBuff(multiplier) {
+        // Stacks linearly: 1.0 + 0.2 + 0.3 = 1.5
+        this.damageBuff += (multiplier - 1.0);
     }
 
     getColor() {
@@ -67,4 +94,3 @@ export class Building {
         return this.typeId === 8;
     }
 }
-

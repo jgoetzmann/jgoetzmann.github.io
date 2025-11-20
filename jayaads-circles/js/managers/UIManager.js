@@ -46,7 +46,23 @@ export class UIManager {
         
         menuContent.innerHTML = `
             <h1 style="font-size: 48px; margin-bottom: 20px;">Cubes vs Circles</h1>
-            <h2 style="font-size: 24px; margin-bottom: 30px;">v0.6.1</h2>
+            <h2 style="font-size: 24px; margin-bottom: 30px;">v0.6.3</h2>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">Difficulty:</label>
+                <select id="difficulty-select" style="
+                    padding: 8px 15px;
+                    font-size: 16px;
+                    background: #555;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    width: 100%;
+                ">
+                    <option value="NORMAL">Normal</option>
+                    <option value="HARD">Hard</option>
+                    <option value="VERY_HARD">Very Hard</option>
+                </select>
+            </div>
             <button id="start-game-btn" style="
                 background: #154f30;
                 color: white;
@@ -102,7 +118,7 @@ export class UIManager {
             } else {
                 list.innerHTML = scores.map((score, idx) => `
                     <div style="padding: 5px; border-bottom: 1px solid #555;">
-                        <strong>#${idx + 1}</strong> Round ${score.round} | 
+                        <strong>#${idx + 1}</strong> Wave ${score.round} | 
                         ${score.kills} Kills | 
                         ${score.moneyEarned} Money
                     </div>
@@ -146,7 +162,7 @@ export class UIManager {
             ${isNewHigh ? '<h2 style="color: #ffd700; margin-bottom: 20px;">🏆 NEW HIGH SCORE! 🏆</h2>' : ''}
             <div style="text-align: left; margin: 20px 0;">
                 <h3>Game Summary</h3>
-                <p><strong>Round Reached:</strong> ${stats.round}</p>
+                <p><strong>Wave Reached:</strong> ${stats.round}</p>
                 <p><strong>Enemies Killed:</strong> ${stats.kills}</p>
                 <p><strong>Money Earned:</strong> $${stats.moneyEarned}</p>
                 <p><strong>Money Spent:</strong> $${stats.moneySpent}</p>
@@ -191,7 +207,13 @@ export class UIManager {
     }
 
     updateStats() {
-        if (this.roundUI) this.roundUI.innerHTML = `Round: ${this.gameState.getRoundNumber()}`;
+        // Show wave number instead of round number
+        // Wave number should match the actual current wave (0 means no wave started yet)
+        let waveNumber = 0;
+        if (window.waveManager && window.waveManager.currentWave > 0) {
+            waveNumber = window.waveManager.currentWave;
+        }
+        if (this.roundUI) this.roundUI.innerHTML = `Wave: ${waveNumber}`;
         if (this.moneyUI) this.moneyUI.innerHTML = `Money: ${Math.floor(this.gameState.money)}`;
         if (this.livesUI) this.livesUI.innerHTML = `Lives: ${this.gameState.lives}`;
         if (this.bankUI) this.bankUI.innerHTML = `Banks: ${this.gameState.bankAmount}`;
@@ -235,14 +257,61 @@ export class UIManager {
     }
 
     drawEnemy(enemy) {
-        if (enemy.property === 2) {
-            this.ctx.fillStyle = '#b5e2ff'; // blue
-        } else if (enemy.property === 1) {
-            this.ctx.fillStyle = '#feb1b1'; // red
+        // Draw enemy shape (square or hexagon)
+        if (enemy.shape === 'hexagon') {
+            // Draw hexagon for fortified enemies
+            this.ctx.beginPath();
+            const centerX = enemy.positionX + enemy.size / 2;
+            const centerY = enemy.positionY + enemy.size / 2;
+            const radius = enemy.size / 2;
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                if (i === 0) {
+                    this.ctx.moveTo(x, y);
+                } else {
+                    this.ctx.lineTo(x, y);
+                }
+            }
+            this.ctx.closePath();
+            
+            // Base color
+            if (enemy.property === 2) {
+                this.ctx.fillStyle = '#b5e2ff'; // blue
+            } else if (enemy.property === 1) {
+                this.ctx.fillStyle = '#feb1b1'; // red
+            } else {
+                this.ctx.fillStyle = '#232323'; // black
+            }
+            this.ctx.fill();
+            
+            // Draw modifier colors as border
+            if (enemy.modifiers && enemy.modifiers.length > 0) {
+                const modifier = enemy.modifiers[0]; // Show first modifier color
+                this.ctx.strokeStyle = modifier.color || '#ffffff';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+            }
         } else {
-            this.ctx.fillStyle = '#232323'; // black
+            // Draw square
+            if (enemy.property === 2) {
+                this.ctx.fillStyle = '#b5e2ff'; // blue
+            } else if (enemy.property === 1) {
+                this.ctx.fillStyle = '#feb1b1'; // red
+            } else {
+                this.ctx.fillStyle = '#232323'; // black
+            }
+            this.ctx.fillRect(enemy.positionX, enemy.positionY, enemy.size, enemy.size);
+            
+            // Draw modifier color border
+            if (enemy.modifiers && enemy.modifiers.length > 0) {
+                const modifier = enemy.modifiers[0]; // Show first modifier color
+                this.ctx.strokeStyle = modifier.color || '#ffffff';
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(enemy.positionX, enemy.positionY, enemy.size, enemy.size);
+            }
         }
-        this.ctx.fillRect(enemy.positionX, enemy.positionY, enemy.size, enemy.size);
     }
 
     drawBuilding(building) {

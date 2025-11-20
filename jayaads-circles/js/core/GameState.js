@@ -14,6 +14,11 @@ export class GameState {
         this.isMenuOpen = true;
         this.runWhenHidden = false;
         this.speedMultiplier = 1; // 1 = normal, 2 = 2x speed, etc.
+        this.difficulty = 'NORMAL'; // NORMAL, HARD, VERY_HARD
+        
+        // Game time tracking (accounts for speed multiplier)
+        this.gameTime = 0; // Total game time in milliseconds (adjusted for speed)
+        this.lastGameTimeUpdate = null;
         
         // Stats tracking
         this.stats = {
@@ -39,6 +44,9 @@ export class GameState {
         this.updateUI = true;
         this.isPaused = false;
         this.speedMultiplier = 1;
+        this.difficulty = 'NORMAL';
+        this.gameTime = 0;
+        this.lastGameTimeUpdate = null;
         this.stats = {
             kills: 0,
             moneyEarned: 0,
@@ -54,6 +62,24 @@ export class GameState {
     startGame() {
         this.isMenuOpen = false;
         this.stats.startTime = Date.now();
+        this.lastGameTimeUpdate = performance.now();
+        this.gameTime = 0;
+    }
+    
+    updateGameTime(currentTime) {
+        if (!this.lastGameTimeUpdate) {
+            this.lastGameTimeUpdate = currentTime;
+            return;
+        }
+        if (!this.isPaused && !this.isMenuOpen) {
+            const deltaTime = currentTime - this.lastGameTimeUpdate;
+            this.gameTime += deltaTime * this.speedMultiplier;
+        }
+        this.lastGameTimeUpdate = currentTime;
+    }
+    
+    getGameTimeSeconds() {
+        return this.gameTime / 1000;
     }
     
     recordKill() {
@@ -112,16 +138,7 @@ export class GameState {
         return this.lives < 0;
     }
 
-    getRoundNumber() {
-        return Math.floor(this.round / GAME_CONFIG.ROUND_DURATION);
-    }
-
-    shouldSpawnUnit() {
-        return Number.isInteger(this.round / GAME_CONFIG.SPAWN_INTERVAL);
-    }
-
-    shouldEndRound() {
-        return Number.isInteger(this.round / GAME_CONFIG.ROUND_DURATION);
-    }
+    // Round is now only used for building attack timing (frame counter)
+    // All other round-based logic has been removed in favor of wave system
 }
 

@@ -1,3 +1,20 @@
+// Damage Types (defined here to avoid circular dependencies)
+export const DAMAGE_TYPES = {
+    PHYSICAL: 'physical',
+    EXPLOSIVE: 'explosive',
+    POISON: 'poison',
+    MAGIC: 'magic',
+    TRUE: 'true',
+    ELECTRICAL: 'electrical'
+};
+
+// Tower Categories
+export const TOWER_CATEGORIES = {
+    DAMAGE: 'damage',
+    SUPPORT: 'support',
+    ECON: 'econ'
+};
+
 // Game Constants
 export const GAME_CONFIG = {
     CANVAS_WIDTH: 960,
@@ -53,27 +70,120 @@ export const LIVES_COST = {
 };
 
 // Building Types Configuration
+// Note: damageFamily and category will be set in Building constructor using DamageSystem
+// All new stats default to: penetration=0, crit=0/100, fortifiedScaler=1.0, ccResist=0
 export const BUILDING_TYPES = {
-    CANNON: { id: 0, name: "cannon", property: 1, size: 5, range: 50, attackSpeed: 30, damage: 5, targets: 1 },
-    MULTI_CANNON: { id: 1, name: "multi cannon", property: 1, size: 7.5, range: 30, attackSpeed: 30, damage: 7.5, targets: 3 },
-    HUGE_CANNON: { id: 2, name: "huge cannon", property: 1, size: 12.5, range: 100, attackSpeed: 120, damage: 250, targets: 1 },
-    LASER: { id: 3, name: "laser", property: 2, size: 5, range: 60, attackSpeed: 5, damage: 5, targets: 1 },
-    FROST_LASER: { id: 4, name: "frost laser", property: 2, size: 7.5, range: 50, attackSpeed: 5, damage: 0.9, targets: 1 },
-    CHAIN_LASER: { id: 5, name: "chain laser", property: 2, size: 12.5, range: 100, attackSpeed: 200, damage: 100, targets: 5 },
-    CANNON_FACTORY: { id: 6, name: "cannon factory", property: 1, size: 10, range: 50, attackSpeed: 600, damage: 100, targets: 1 },
-    PIERCE_LASER: { id: 7, name: "pierce laser", property: 2, size: 12.5, range: 100, attackSpeed: 80, damage: 125, targets: 1 },
-    SCATTER_CANNON: { id: 8, name: "scatter cannon", property: 1, size: 7.5, range: 80, attackSpeed: 200, damage: 35, targets: 8 },
-    MISSILE: { id: 9, name: "missile", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    SCATTER_MISSILE: { id: 10, name: "scatter missile", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    TOXIC_MISSILE: { id: 11, name: "toxic missle", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    SHOCK_MISSILE: { id: 12, name: "shock missle", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    LEGEND_1: { id: 13, name: "legend 1", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    LEGEND_2: { id: 14, name: "legend 2", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    LEGEND_3: { id: 15, name: "legend 3", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    LEGEND_4: { id: 16, name: "legend 4", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0 },
-    MOVING_CANNON: { id: 17, name: "moving cannon", property: 1, size: 4.8, range: 50, attackSpeed: 5, damage: 2, targets: 1 },
-    PELLET: { id: 18, name: "pellet", property: 1, size: 2.5, range: 0, attackSpeed: 0, damage: 35, targets: 0 },
-    BANK: { id: 19, name: "bank", property: 0, size: 5, range: 170, attackSpeed: 250, damage: 0, targets: 0 }
+    CANNON: { 
+        id: 0, name: "cannon", property: 1, size: 5, range: 50, attackSpeed: 30, damage: 5, targets: 1,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {[DAMAGE_TYPES.PHYSICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    MULTI_CANNON: { 
+        id: 1, name: "multi cannon", property: 1, size: 7.5, range: 30, attackSpeed: 30, damage: 7.5, targets: 3,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {[DAMAGE_TYPES.PHYSICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    HUGE_CANNON: { 
+        id: 2, name: "huge cannon", property: 1, size: 12.5, range: 100, attackSpeed: 120, damage: 250, targets: 1,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.EXPLOSIVE,
+        damageTypes: {[DAMAGE_TYPES.EXPLOSIVE]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    LASER: { 
+        id: 3, name: "laser", property: 2, size: 5, range: 60, attackSpeed: 5, damage: 5, targets: 1,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.MAGIC,
+        damageTypes: {[DAMAGE_TYPES.MAGIC]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    FROST_LASER: { 
+        id: 4, name: "frost laser", property: 2, size: 7.5, range: 50, attackSpeed: 5, damage: 0.9, targets: 1,
+        category: TOWER_CATEGORIES.SUPPORT, damageFamily: DAMAGE_TYPES.MAGIC,
+        damageTypes: {[DAMAGE_TYPES.MAGIC]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    CHAIN_LASER: { 
+        id: 5, name: "chain laser", property: 2, size: 12.5, range: 100, attackSpeed: 200, damage: 100, targets: 5,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.ELECTRICAL,
+        damageTypes: {[DAMAGE_TYPES.ELECTRICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    CANNON_FACTORY: { 
+        id: 6, name: "cannon factory", property: 1, size: 10, range: 50, attackSpeed: 600, damage: 100, targets: 1,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {[DAMAGE_TYPES.PHYSICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    PIERCE_LASER: { 
+        id: 7, name: "pierce laser", property: 2, size: 12.5, range: 100, attackSpeed: 80, damage: 125, targets: 1,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.MAGIC,
+        damageTypes: {[DAMAGE_TYPES.MAGIC]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    SCATTER_CANNON: { 
+        id: 8, name: "scatter cannon", property: 1, size: 7.5, range: 80, attackSpeed: 200, damage: 35, targets: 8,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {[DAMAGE_TYPES.PHYSICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    MISSILE: { 
+        id: 9, name: "missile", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.EXPLOSIVE,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    SCATTER_MISSILE: { 
+        id: 10, name: "scatter missile", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.EXPLOSIVE,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    TOXIC_MISSILE: { 
+        id: 11, name: "toxic missle", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.POISON,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    SHOCK_MISSILE: { 
+        id: 12, name: "shock missle", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.ELECTRICAL,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    LEGEND_1: { 
+        id: 13, name: "legend 1", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.TRUE,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    LEGEND_2: { 
+        id: 14, name: "legend 2", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.TRUE,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    LEGEND_3: { 
+        id: 15, name: "legend 3", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.TRUE,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    LEGEND_4: { 
+        id: 16, name: "legend 4", property: 0, size: 0, range: 0, attackSpeed: 0, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.TRUE,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    },
+    MOVING_CANNON: { 
+        id: 17, name: "moving cannon", property: 1, size: 4.8, range: 50, attackSpeed: 5, damage: 2, targets: 1,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {[DAMAGE_TYPES.PHYSICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    PELLET: { 
+        id: 18, name: "pellet", property: 1, size: 2.5, range: 0, attackSpeed: 0, damage: 35, targets: 0,
+        category: TOWER_CATEGORIES.DAMAGE, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {[DAMAGE_TYPES.PHYSICAL]: 1.0}, penetration: {}, critChance: 0, critDamage: 100,
+        fortifiedScaler: 1.0, ccResist: 0
+    },
+    BANK: { 
+        id: 19, name: "bank", property: 0, size: 5, range: 170, attackSpeed: 250, damage: 0, targets: 0,
+        category: TOWER_CATEGORIES.ECON, damageFamily: DAMAGE_TYPES.PHYSICAL,
+        damageTypes: {}, penetration: {}, critChance: 0, critDamage: 100, fortifiedScaler: 1.0, ccResist: 0
+    }
 };
 
 // Building Colors

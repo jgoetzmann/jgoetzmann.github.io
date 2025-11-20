@@ -15,9 +15,9 @@ export class HighScoreManager {
             date: new Date().toISOString()
         });
         
-        // Sort by round (descending), then by kills
+        // Sort by wave (descending), then by kills
         scores.sort((a, b) => {
-            if (b.round !== a.round) return b.round - a.round;
+            if (b.round !== a.round) return b.round - a.round; // 'round' field now stores wave number
             return b.kills - a.kills;
         });
         
@@ -27,13 +27,13 @@ export class HighScoreManager {
         return topScores;
     }
 
-    isNewHighScore(round, kills) {
+    isNewHighScore(wave, kills) {
         const scores = this.getHighScores();
         if (scores.length < 10) return true;
         
         const lowestScore = scores[scores.length - 1];
-        return round > lowestScore.round || 
-               (round === lowestScore.round && kills > lowestScore.kills);
+        return wave > lowestScore.round || // 'round' field now stores wave number
+               (wave === lowestScore.round && kills > lowestScore.kills);
     }
 }
 

@@ -6,8 +6,9 @@ import { PurchaseManager } from './managers/PurchaseManager.js';
 import { UpgradeManager } from './managers/UpgradeManager.js';
 import { UIManager } from './managers/UIManager.js';
 import { HighScoreManager } from './managers/HighScoreManager.js';
+import { WaveManager, WAVE_CONFIG } from './utils/WaveSystem.js';
 import { Projectile } from './entities/Projectile.js';
-import { GAME_CONFIG, BUILDING_TYPES } from './utils/Constants.js';
+import { GAME_CONFIG, BUILDING_TYPES, PURCHASE_COSTS } from './utils/Constants.js';
 
 // Initialize game
 const map = document.getElementById('map');
@@ -38,11 +39,52 @@ document.addEventListener('visibilitychange', () => {
 
 
 function startNewGame() {
+    // Reset everything
     gameState.reset();
+    // Get difficulty from dropdown, ensure it's uppercase
+    const difficultySelect = document.getElementById('difficulty-select');
+    const selectedDifficulty = (difficultySelect ? difficultySelect.value : window.selectedDifficulty || 'NORMAL').toUpperCase();
+    gameState.difficulty = selectedDifficulty;
+    window.selectedDifficulty = selectedDifficulty;
+    
     spawnManager.getEnemies().length = 0;
     spawnManager.getBuildings().length = 0;
     attackManager.getProjectiles().length = 0;
     uiManager.moneyGains.length = 0;
+    
+    // Reset purchase costs
+    purchaseManager.resetCosts();
+    
+    // Reset all button costs
+    for (let i = 1; i <= 15; i++) {
+        const btn = document.getElementById(`button${i}`);
+        if (btn) {
+            const originalTexts = {
+                1: 'Buy Cannon! (Free)',
+                2: 'Buy Multi Cannon! ($300)',
+                3: 'Buy Huge Cannon! ($1600)',
+                4: 'Buy Laser! ($675)',
+                5: 'Buy Frost Laser! ($1250)',
+                6: 'Buy Chain Laser! ($2400)',
+                7: 'Kill Random! ($50)',
+                8: 'Slow All! ($100)',
+                9: 'Buy Bank! ($500)',
+                10: 'Upgrade Cannons! ($2500)',
+                11: 'Upgrade Lasers! ($2500)',
+                12: 'Upgrade Utility! ($2500)',
+                13: 'Buy Cannon Factory! ($1200)',
+                14: 'Buy Pierce Laser! ($2000)',
+                15: 'Buy Scatter Cannon! ($800)'
+            };
+            if (originalTexts[i]) {
+                btn.innerHTML = originalTexts[i];
+            }
+        }
+    }
+    
+    // Create new wave manager with selected difficulty
+    window.waveManager = new WaveManager(selectedDifficulty);
+    
     gameState.startGame();
     uiManager.hideMenu();
 }
@@ -54,6 +96,15 @@ setTimeout(() => {
     const startBtn = document.getElementById('start-game-btn');
     if (startBtn) {
         startBtn.addEventListener('click', startNewGame);
+    }
+    
+    // Difficulty selector
+    const difficultySelect = document.getElementById('difficulty-select');
+    if (difficultySelect) {
+        window.selectedDifficulty = difficultySelect.value;
+        difficultySelect.addEventListener('change', (e) => {
+            window.selectedDifficulty = e.target.value;
+        });
     }
     
     const runWhenHiddenCheckbox = document.getElementById('run-when-hidden');
@@ -75,17 +126,24 @@ setTimeout(() => {
             // Cycle through speeds: 1x -> 3x -> 5x -> 1x
             if (gameState.speedMultiplier === 1) {
                 gameState.speedMultiplier = 3;
-                fastForwardBtn.textContent = '⏩ Fast Forward (3x)';
                 fastForwardBtn.style.backgroundColor = '#ff6b00';
             } else if (gameState.speedMultiplier === 3) {
                 gameState.speedMultiplier = 5;
-                fastForwardBtn.textContent = '⏩ Fast Forward (5x)';
                 fastForwardBtn.style.backgroundColor = '#ff3636';
-            } else {
+        } else {
                 gameState.speedMultiplier = 1;
-                fastForwardBtn.textContent = '⏩ Fast Forward (1x)';
                 fastForwardBtn.style.backgroundColor = '#555';
             }
+        });
+    }
+    
+    // Debug button
+    const debugBtn = document.getElementById('debug-btn');
+    const debugPanel = document.getElementById('debug-panel');
+    if (debugBtn && debugPanel) {
+        debugBtn.addEventListener('click', () => {
+            const isVisible = debugPanel.style.display !== 'none';
+            debugPanel.style.display = isVisible ? 'none' : 'block';
         });
     }
 }, 100);
@@ -197,7 +255,28 @@ function updateEnemyPositions() {
         enemy.updatePosition();
         if (enemy.isOffScreen()) {
             enemy.dead = true;
-            gameState.subtractLives(enemy.getLivesCost());
+            const livesCost = enemy.getLivesCost();
+            gameState.subtractLives(livesCost);
+            // Check game over immediately
+            if (gameState.isGameOver() && gameState.updateUI) {
+                gameState.updateUI = false;
+                gameState.stats.endTime = Date.now();
+                gameState.lives = 'Dead';
+                uiManager.updateStats();
+                
+                const finalStats = {
+                    round: window.waveManager ? window.waveManager.currentWave : 0,
+                    kills: gameState.stats.kills,
+                    moneyEarned: gameState.stats.moneyEarned,
+                    moneySpent: gameState.stats.moneySpent,
+                    buildingsPlaced: gameState.stats.buildingsPlaced,
+                    totalDamage: gameState.stats.totalDamage,
+                    duration: gameState.getGameDuration()
+                };
+                
+                highScoreManager.saveHighScore(finalStats);
+                uiManager.showDeathPopup(finalStats, highScoreManager);
+            }
         }
     }
 }
@@ -345,9 +424,11 @@ function clearDeadEnemies() {
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
         if (enemy.dead || enemy.hp < 1) {
-            // Award money
-            const moneyAward = Math.floor(enemy.size * (1.6 + (0.4 * gameState.utilityLevel)));
-            if (enemy.id !== 0) {
+            // Award money: simple formula based on enemy level
+            let moneyAward = enemy.level * 20;
+            moneyAward = Math.floor(moneyAward);
+            
+            if (enemy.level > 0) {
                 gameState.addMoney(moneyAward);
                 gameState.recordMoneyEarned(moneyAward);
                 gameState.recordKill();
@@ -359,7 +440,9 @@ function clearDeadEnemies() {
 }
 
 function endRoundCash() {
-    if (gameState.shouldEndRound()) {
+    // Periodic money bonus - every 20 seconds (1000 game loops at 50 FPS)
+    // Using round as a simple frame counter for timing
+    if (gameState.round % 1000 === 0 && gameState.round > 0) {
         const endOfRoundMoney = 90 + (gameState.round / 100);
         gameState.addMoney(endOfRoundMoney);
         gameState.recordMoneyEarned(endOfRoundMoney);
@@ -372,13 +455,48 @@ function gameLoop() {
     // All state checks are done in timeBasedGameLoop
     gameState.incrementRound();
     
-    // Spawn units
-    if (gameState.shouldSpawnUnit()) {
-        const enemy = spawnManager.spawnEnemy(gameState.round);
-        if (enemy) {
-            gameState.recordEnemySpawned();
+    // Update game time (accounts for speed multiplier)
+    const currentTime = performance.now();
+    gameState.updateGameTime(currentTime);
+    
+    // Wave-based spawning
+    if (window.waveManager) {
+        // Use game time for wave delays (accounts for speed multiplier)
+        const gameTime = gameState.getGameTimeSeconds() * 1000;
+        
+        // Check if we should start a new wave FIRST
+        if (window.waveManager.shouldStartWave(gameTime)) {
+            // Wave is starting, first part will spawn immediately
+            // Don't spawn part here, let the part check below handle it
         }
-    }
+        
+        // Check if we should spawn the next part
+        if (window.waveManager.shouldSpawnPart(gameTime)) {
+            const spawns = window.waveManager.spawnEnemiesForPart();
+            for (const spawn of spawns) {
+                const enemy = spawnManager.spawnEnemyForWave(spawn.level, spawn.modifiers, spawn.isFortified);
+                if (enemy) {
+                    gameState.recordEnemySpawned();
+                }
+            }
+            
+            // Mark that we've spawned this part and set delay for next part
+            // Check if there are more parts BEFORE checking if wave is complete
+            // (currentPart was incremented in shouldSpawnPart, so check if NEXT part exists)
+            if (window.waveManager && window.waveManager.getMaxPartsForWave) {
+                const maxParts = window.waveManager.getMaxPartsForWave();
+                const nextPart = window.waveManager.currentPart + 1;
+                
+                if (nextPart > maxParts) {
+                    // No more parts, wave is complete, wait for next wave
+                    window.waveManager.startWaveDelay(gameTime);
+    } else {
+                    // More parts to come, wait for next part
+                    window.waveManager.startPartDelay(gameTime);
+                }
+            }
+        }
+            }
     
     // Update game
     uiManager.clearMap();
@@ -411,6 +529,9 @@ function gameLoop() {
     // Update UI
     uiManager.updateStats();
     
+    // Update debug panel if visible
+    updateDebugPanel();
+    
     // Check game over
     if (gameState.isGameOver() && gameState.updateUI) {
         gameState.updateUI = false;
@@ -419,7 +540,7 @@ function gameLoop() {
         uiManager.updateStats();
         
         const finalStats = {
-            round: gameState.getRoundNumber(),
+            round: window.waveManager ? window.waveManager.currentWave : 0,
             kills: gameState.stats.kills,
             moneyEarned: gameState.stats.moneyEarned,
             moneySpent: gameState.stats.moneySpent,
@@ -435,9 +556,9 @@ function gameLoop() {
         uiManager.showDeathPopup(finalStats, highScoreManager);
     }
     
-    // Check win condition
-    if (gameState.round === GAME_CONFIG.WIN_ROUND) {
-        alert('Congratulations on Beating the Game! Every Round that went by was 20 Seconds Wasted in your Life! If you got here Legit Good Job if not you Found an Exploit Yay! You may Continue on in Freeplay and Flex on your Friends!');
+    // Check win condition (wave-based instead of round-based)
+    if (window.waveManager && window.waveManager.currentWave >= 100) {
+        alert('Congratulations on Beating the Game! Every Wave that went by was 30 Seconds Wasted in your Life! If you got here Legit Good Job if not you Found an Exploit Yay! You may Continue on in Freeplay and Flex on your Friends!');
     }
 }
 
@@ -468,7 +589,8 @@ function timeBasedGameLoop(currentTime) {
     
     // Run game updates in fixed steps
     // This ensures consistent game speed even if browser throttles
-    const maxSteps = Math.min(5 * gameState.speedMultiplier, 20); // Prevent spiral of death, but allow more steps for fast forward
+    // Allow more steps for higher speed multipliers to actually achieve the speed
+    const maxSteps = Math.min(10 * gameState.speedMultiplier, 50); // Increased limit for proper speed scaling
     let steps = 0;
     
     while (accumulatedTime >= FRAME_TIME && steps < maxSteps) {
@@ -483,6 +605,107 @@ function timeBasedGameLoop(currentTime) {
     }
     
     requestAnimationFrame(timeBasedGameLoop);
+}
+
+// Debug panel update function
+function updateDebugPanel() {
+    const debugPanel = document.getElementById('debug-panel');
+    const debugContent = document.getElementById('debug-content');
+    if (!debugPanel || !debugContent || debugPanel.style.display === 'none') {
+        return;
+    }
+    
+    const currentTime = performance.now();
+    const enemies = spawnManager.getEnemies();
+    const buildings = spawnManager.getBuildings();
+    const projectiles = attackManager.getProjectiles();
+    
+    let debugInfo = '';
+    
+    // Time & Performance
+    debugInfo += '<div style="color: #00ffff; margin-bottom: 8px;"><strong>⏱️ TIME & PERFORMANCE</strong></div>';
+    debugInfo += `Game Time: ${gameState.getGameTimeSeconds().toFixed(2)}s<br>`;
+    debugInfo += `Real Time: ${(currentTime / 1000).toFixed(2)}s<br>`;
+    debugInfo += `Frame: ${gameState.round}<br>`;
+    debugInfo += `Speed: ${gameState.speedMultiplier}x<br>`;
+    debugInfo += `Paused: ${gameState.isPaused ? 'Yes' : 'No'}<br>`;
+    debugInfo += `Menu Open: ${gameState.isMenuOpen ? 'Yes' : 'No'}<br>`;
+    debugInfo += `<br>`;
+    
+    // Wave System
+    debugInfo += '<div style="color: #ff00ff; margin-bottom: 8px;"><strong>🌊 WAVE SYSTEM</strong></div>';
+    if (window.waveManager) {
+        const wm = window.waveManager;
+        const gameTime = gameState.getGameTimeSeconds() * 1000;
+        debugInfo += `Wave: ${wm.currentWave}<br>`;
+        debugInfo += `Part: ${wm.currentPart} / ${wm.getMaxPartsForWave()}<br>`;
+        debugInfo += `Max Level: ${wm.getMaxLevelForWave()}<br>`;
+        debugInfo += `Max Modifiers: ${wm.getMaxModifiersForWave()}<br>`;
+        debugInfo += `Threat: ${wm.waveThreat.toFixed(0)}<br>`;
+        debugInfo += `Difficulty: ${wm.difficulty}<br>`;
+        debugInfo += `Waiting for Wave: ${wm.isWaitingForWave ? 'Yes' : 'No'}<br>`;
+        debugInfo += `Waiting for Part: ${wm.isWaitingForPart ? 'Yes' : 'No'}<br>`;
+        debugInfo += `Wave Complete: ${wm.isWaveComplete() ? 'Yes' : 'No'}<br>`;
+        debugInfo += `Has More Parts: ${wm.hasMoreParts() ? 'Yes' : 'No'}<br>`;
+        debugInfo += `partStartTime: ${wm.partStartTime === null ? 'null' : ((gameTime - wm.partStartTime) / 1000).toFixed(1) + 's ago'}<br>`;
+        if (wm.waveStartTime) {
+            const waveElapsed = (gameTime - wm.waveStartTime) / 1000;
+            debugInfo += `Wave Time: ${waveElapsed.toFixed(1)}s<br>`;
+        }
+        if (wm.partStartTime && wm.isWaitingForPart) {
+            const partElapsed = (gameTime - wm.partStartTime) / 1000;
+            const remaining = (WAVE_CONFIG.PART_DELAY / 1000) - partElapsed;
+            debugInfo += `Part Delay: ${remaining > 0 ? remaining.toFixed(1) + 's remaining' : 'READY'}<br>`;
+        }
+    } else {
+        debugInfo += `Wave Manager: Not Initialized<br>`;
+    }
+    debugInfo += `<br>`;
+    
+    // Entities
+    debugInfo += '<div style="color: #ffff00; margin-bottom: 8px;"><strong>🎯 ENTITIES</strong></div>';
+    debugInfo += `Enemies: ${enemies.length}<br>`;
+    debugInfo += `Buildings: ${buildings.length}<br>`;
+    debugInfo += `Projectiles: ${projectiles.length}<br>`;
+    
+    // Enemy breakdown
+    if (enemies.length > 0) {
+        const enemyLevels = {};
+        enemies.forEach(e => {
+            enemyLevels[e.level] = (enemyLevels[e.level] || 0) + 1;
+        });
+        debugInfo += `Enemy Levels: `;
+        const levelStr = Object.entries(enemyLevels)
+            .map(([level, count]) => `L${level}:${count}`)
+            .join(', ');
+        debugInfo += (levelStr || 'None') + '<br>';
+    }
+    debugInfo += `<br>`;
+    
+    // Game State
+    debugInfo += '<div style="color: #00ff00; margin-bottom: 8px;"><strong>💰 GAME STATE</strong></div>';
+    debugInfo += `Money: $${gameState.money}<br>`;
+    debugInfo += `Lives: ${gameState.lives}<br>`;
+    debugInfo += `Bank: $${gameState.bankAmount.toFixed(0)}<br>`;
+    debugInfo += `Canon Level: ${gameState.canonLevel}<br>`;
+    debugInfo += `Laser Level: ${gameState.laserLevel}<br>`;
+    debugInfo += `Utility Level: ${gameState.utilityLevel}<br>`;
+    debugInfo += `<br>`;
+    
+    // Stats
+    debugInfo += '<div style="color: #ff8800; margin-bottom: 8px;"><strong>📊 STATS</strong></div>';
+    debugInfo += `Kills: ${gameState.stats.kills}<br>`;
+    debugInfo += `Money Earned: $${gameState.stats.moneyEarned.toFixed(0)}<br>`;
+    debugInfo += `Money Spent: $${gameState.stats.moneySpent.toFixed(0)}<br>`;
+    debugInfo += `Buildings Placed: ${gameState.stats.buildingsPlaced}<br>`;
+    debugInfo += `Enemies Spawned: ${gameState.stats.enemiesSpawned}<br>`;
+    debugInfo += `Total Damage: ${gameState.stats.totalDamage.toFixed(0)}<br>`;
+    if (gameState.stats.startTime) {
+        const duration = gameState.getGameDuration();
+        debugInfo += `Duration: ${gameState.formatTime(duration)}<br>`;
+    }
+    
+    debugContent.innerHTML = debugInfo;
 }
 
 // Start the game loop

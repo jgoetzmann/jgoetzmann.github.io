@@ -1,0 +1,125 @@
+# Cubes vs Circles - Development Guidelines
+
+## Project Structure
+
+This is a tower defense game built with vanilla JavaScript using ES6 modules. The codebase is organized using OOP principles with managers, entities, and utility classes.
+
+### Directory Structure
+```
+js/
+├── core/           # Core game state management
+├── entities/       # Game entities (Enemy, Building, Projectile)
+├── managers/       # Game managers (Spawn, Attack, Collision, Purchase, Upgrade, UI, HighScore)
+└── utils/          # Utility classes and constants (Constants, Helpers, DamageSystem, WaveSystem, ModifierSystem, EnemyThreatCalculator)
+```
+
+## Key Systems
+
+### 1. Game State (`js/core/GameState.js`)
+- Manages player resources (money, lives)
+- Tracks game statistics (kills, money earned/spent, damage dealt)
+- Controls game flow (paused, menu open, difficulty)
+- `round` is now only a frame counter (used for attack timing and periodic bonuses)
+- Game time tracking with speed multiplier support
+- **When editing**: Update `reset()` method when adding new state variables
+
+### 2. Wave System (`js/utils/WaveSystem.js`)
+- Manages discrete waves with 30-second delays between waves
+- Each wave has 1-5 parts (separated by 5-second delays)
+- Wave progression: 1-10 (1 part), 11-20 (2 parts), 21-30 (3 parts), 31-40 (4 parts), 41-50 (5 parts), 51+ (5 parts)
+- Threat-based enemy spawning with difficulty scaling
+- Threat formula: (previous wave + addition) * multiplier
+  - NORMAL: +60 then *1.05
+  - HARD: +80 then *1.10
+  - VERY_HARD: +100 then *1.15
+- Max enemy level and modifiers scale with wave number
+- **When editing**: Modify `spawnEnemiesForPart()` to change spawning logic
+
+### 3. Damage System (`js/utils/DamageSystem.js`)
+- 6 damage types: Physical, Explosive, Poison, Magic, True, Electrical
+- Resistance formulas: R ≥ 0: 100/(100+R), R < 0: 2 - 100/(100-R)
+- Penetration (percent and flat)
+- Critical hits (chance and damage)
+- **When editing**: Update `DamageCalculator.calculateDamage()` for formula changes
+
+### 4. Modifier System (`js/utils/ModifierSystem.js`)
+- Enemy modifiers with rarity (Common, Uncommon, Rare, Epic, Legendary)
+- Threat multipliers
+- Special behaviors (Randomizer, Ring Leader, Speedster)
+- **When editing**: Add new modifiers to `MODIFIERS` object
+
+### 5. Spawn Manager (`js/managers/SpawnManager.js`)
+- Handles enemy and building spawning
+- Primary method: `spawnEnemyForWave(level, modifiers, isFortified)` for wave-based spawning
+- Legacy `spawnEnemy(round)` method exists but is no longer used
+- **When editing**: Always use `spawnEnemyForWave()` for new spawning logic
+
+## Common Editing Tasks
+
+### Adding a New Tower
+1. Add tower definition to `BUILDING_TYPES` in `js/utils/Constants.js`
+2. Set `category`, `damageFamily`, `damageTypes`, `penetration`, `critChance`, `critDamage`, `fortifiedScaler`, `ccResist`
+3. Add purchase method in `js/managers/PurchaseManager.js`
+4. Add attack logic in `js/managers/AttackManager.js`
+5. Add drawing logic in `js/managers/UIManager.js`
+6. Add button in `index.html` and wire up in `js/game.js`
+
+### Adding a New Enemy Modifier
+1. Add modifier to `MODIFIERS` object in `js/utils/ModifierSystem.js`
+2. Set `rarity`, `threatMultiplier`, `effects`, `icon`
+3. Update `ModifierManager.applyModifiers()` if modifier has special effects
+4. Add color to `MODIFIER_COLORS` if needed
+
+### Changing Damage Formulas
+1. Edit `DamageCalculator.calculateDamage()` in `js/utils/DamageSystem.js`
+2. Test with different resistance values
+3. Update tower stats in `BUILDING_TYPES` if needed
+
+### Modifying Wave Spawning
+1. Edit `spawnEnemiesForPart()` in `js/utils/WaveSystem.js`
+2. Adjust `PART_CONFIGS` for part types
+3. Modify `getWaveThreat()` for threat scaling
+
+## Code Patterns
+
+### ES6 Modules
+- Always use `import`/`export` statements
+- No `require()` or CommonJS
+- File extensions required: `.js`
+
+### Game Loop
+- Uses `requestAnimationFrame` with time accumulation
+- Fixed 50 FPS (20ms per frame)
+- Handles tab visibility and speed multiplier
+
+### Enemy Creation
+```javascript
+const enemy = new Enemy(level, positionX, positionY, modifiers);
+// level: 1-10 (levels 6-10 added in v0.6.3)
+// modifiers: Array of modifier objects from ModifierSystem
+// Max modifiers per enemy: 1 (waves 1-30), 2 (waves 31-50), 3 (wave 51+)
+```
+
+### Building Creation
+```javascript
+const building = new Building(typeId, positionX, positionY);
+// typeId: Building type ID from BUILDING_TYPES
+```
+
+## Important Notes
+
+- **Version Number**: Update in `index.html` title and patch notes
+- **High Scores**: Stored in localStorage via `HighScoreManager`, now tracks wave number instead of round
+- **Game Reset**: All state must be reset in `startNewGame()` function
+- **Wave Manager**: Created per game in `startNewGame()`, stored in `window.waveManager`
+- **Difficulty**: Set via dropdown, affects threat scaling formula (NORMAL: +60 *1.05, HARD: +80 *1.10, VERY_HARD: +100 *1.15)
+- **Round System**: Mostly removed - `round` is now only a frame counter for attack timing
+- **Money Formula**: Simple `20 * enemy.level` (no modifiers or bonuses)
+- **Wave Delays**: 30 seconds between waves, 5 seconds between parts (game time, accounts for speed multiplier)
+
+## Testing
+
+- Run local server: `npm start` (uses http-server)
+- Open: `http://localhost:8080`
+- Game runs at 50 FPS, uses time-based loop for consistency
+
